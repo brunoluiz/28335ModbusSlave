@@ -43,20 +43,6 @@ void serial_interrupt_switch( Uint16 xRxEnable, Uint16 xTxEnable )
 		SciaRegs.SCICTL2.bit.TXINTENA =0;
 }
 
-void clear_rx_frame(){
-	// Clears RX frame
-	int i;
-	for(i = 0; i < MB_FRAME_CHAR_TOTALS; i++)
-		rx_frame[i] = 0;
-}
-
-void clear_tx_frame(){
-	// Clears TX frame
-	int i;
-	for(i = 0; i < MB_FRAME_CHAR_TOTALS; i++)
-			tx_frame[i] = 0;
-}
-
 void serial_send_data(){
 	timer_disable();
 	if(rx_frame[0] == MB_SLAVE_ID)

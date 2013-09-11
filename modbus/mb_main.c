@@ -72,20 +72,21 @@ Uint16 modbus_prep_response()
 		else if(rx_frame[1] == MB_FUNC_WRITE_NREGISTERS || rx_frame[1] == MB_FUNC_WRITE_REGISTER)
 			return modbus_write_func();
 		else
-			return modbus_error_illegalfunc();
+			return modbus_error(MB_ERROR_ILLEGALFUNC);
 
 	} else return 0;
 }
 
 Uint16 modbus_read_func(){
-	Uint16 number_of_data = 0;
-	Uint16 data_address = 0;
-	Uint16 crc = 0;
-	Uint16 frame_lenght = 0;
-	Uint16 i = 0, j = 0;
-	Uint16 register_pos = 0;
+	Uint16 data = 0;				// Stores the sent data
+	Uint16 data_address = 0;		// Stores the start address where the data will be put
+	Uint16 crc = 0;					// Stores CRC code
 
-	Uint32 mem_map = memory_map(rx_frame[1]);
+	Uint16 number_of_data = 0;		// Stores the number of data which have to be got
+	Uint16 frame_lenght = 0;		// Stores the frame length (it is variable)
+	Uint16 i = 0, j = 0, register_pos = 0; 		// Iterators
+
+	Uint32 mem_map = memory_map(rx_frame[1]);	// Gets the address of memory where are the registers we want
 
 	//Get the start address
 	data_address = rx_frame[2] << 8;
@@ -128,15 +129,11 @@ Uint16 modbus_read_func(){
 	return frame_lenght;
 }
 Uint16 modbus_write_func(){
-	Uint16 number_of_data = 0;
-	Uint16 data = 0;
-	Uint16 data_address = 0;
-	Uint16 crc = 0;
-	Uint16 i = 0;
-	Uint16 register_pos = 0;
-	Uint32 *addr = 0;
-
-	Uint32 mem_map = memory_map(rx_frame[1]);
+	Uint16 data = 0;				// Stores the sent data
+	Uint16 data_address = 0;		// Stores the start address where the data will be put
+	Uint16 crc = 0;					// Stores CRC code
+	Uint32 *addr = 0;				// Points the address where it will be written
+	Uint32 mem_map = memory_map(rx_frame[1]);	// Gets the address of memory where are the registers we want
 
 	//Get the start address
 	data_address = rx_frame[2] << 8;
@@ -162,6 +159,10 @@ Uint16 modbus_write_func(){
 		tx_frame[5] = *(addr) & 0x00FF;
 	}
 	else if(rx_frame[1] == MB_FUNC_WRITE_NREGISTERS){
+		Uint16 i = 0;
+		Uint16 number_of_data = 0;
+		Uint16 register_pos = 0;
+
 		//Get the number of registers/coils to write
 		number_of_data = rx_frame[4] << 8;
 		number_of_data = number_of_data|rx_frame[5];
@@ -191,9 +192,10 @@ Uint16 modbus_write_func(){
 	return 8;
 }
 
-Uint16 modbus_error_illegalfunc(){
+Uint16 modbus_error(Uint16 type){
 	Uint32 crc;
-	tx_frame[2] = 0x01; 				// Illegal function info
+
+	tx_frame[2] = type;
 	crc = generate_crc(tx_frame, 3);
 
 	tx_frame[4] = (crc & 0xFF00) >> 8;
@@ -244,11 +246,27 @@ Uint32 memory_map(Uint16 type){
 	else if(type == MB_FUNC_READ_INPUTREGISTERS){
 		return 0x08000;
 	}
+	else
+		return 0x0000;
 }
 
 void reset_data_pointers(){
 	rx_frame_pointer = 0;
 	tx_frame_pointer = 0;
+}
+
+void clear_rx_frame(){
+	// Clears RX frame
+	int i;
+	for(i = 0; i < MB_FRAME_CHAR_TOTALS; i++)
+		rx_frame[i] = 0;
+}
+
+void clear_tx_frame(){
+	// Clears TX frame
+	int i;
+	for(i = 0; i < MB_FRAME_CHAR_TOTALS; i++)
+		tx_frame[i] = 0;
 }
 
 void swap_values(Uint16 *val1, Uint16 *val2){
