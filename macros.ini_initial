@@ -1,0 +1,5 @@
+
+INSTALLROOT_2833X_V132 = ../../
+INSTALLROOT_2833X_TO_IQMATH = ../../../../../libs/math/IQmath
+INSTALLROOT_2833X_TO_FASTRTS = ../../../../../libs/math/FPUfastRTS
+
