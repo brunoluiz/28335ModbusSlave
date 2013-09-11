@@ -49,6 +49,7 @@ void modbus_chk_states();
 Uint16 modbus_prep_response();
 Uint16 modbus_read_func();
 Uint16 modbus_write_func();
+Uint16 modbus_error_notimplemented();
 Uint16 generate_crc(Uint16 buf[], int len);
 Uint32 memory_map(Uint16 type);
 void reset_data_pointers();

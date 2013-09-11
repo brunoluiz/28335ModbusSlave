@@ -82,28 +82,6 @@
 
 void main(void)
 {
-	EALLOW;
-		GpioCtrlRegs.GPADIR.all = 0xFFFF;
-	   // Enable GPIO outputs on GPIO8 - GPIO11, set it high
-	   GpioCtrlRegs.GPAPUD.bit.GPIO8 = 0;   // Enable pullup on GPIO8
-	   GpioDataRegs.GPATOGGLE.bit.GPIO8 = 1;   // Load output latch
-	   GpioCtrlRegs.GPAMUX1.bit.GPIO8 = 0;  // GPIO8 = GPIO8
-	   GpioCtrlRegs.GPADIR.bit.GPIO8 = 1;   // GPIO8 = output
-
-	   GpioCtrlRegs.GPAPUD.bit.GPIO9 = 0;   // Enable pullup on GPIO9
-	   GpioDataRegs.GPATOGGLE.bit.GPIO9 = 1;   // Load output latch
-	   GpioCtrlRegs.GPAMUX1.bit.GPIO9 = 0;  // GPIO9 = GPIO9
-	   GpioCtrlRegs.GPADIR.bit.GPIO9 = 1;   // GPIO9 = output
-
-	   GpioCtrlRegs.GPAPUD.bit.GPIO15 = 0;  // Enable pullup on GPIO10
-	   GpioDataRegs.GPATOGGLE.bit.GPIO15 = 0;  // Load output latch
-	   GpioCtrlRegs.GPAMUX1.bit.GPIO15 = 0; // GPIO10 = GPIO10
-	   GpioCtrlRegs.GPADIR.bit.GPIO15 = 1;   // GPIO10 = output
-
-	   GpioCtrlRegs.GPAPUD.bit.GPIO31 = 0;  // Enable pullup on GPIO11
-	   GpioCtrlRegs.GPAMUX2.bit.GPIO31 = 0; // GPIO11 = GPIO11
-	   GpioCtrlRegs.GPADIR.bit.GPIO31 = 1;  // GPIO11 = output
-	   EDIS;
 // Step 1. Initialize System Control:
 // PLL, WatchDog, enable Peripheral Clocks
 // This example function is found in the DSP2833x_SysCtrl.c file.

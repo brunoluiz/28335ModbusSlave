@@ -67,15 +67,12 @@ Uint16 modbus_prep_response()
 		tx_frame[1] = rx_frame[1];
 
 		//Check if function code is for read data
-		if(rx_frame[1] == MB_FUNC_READ_COIL || rx_frame[1] == MB_FUNC_READ_INPUT || rx_frame[1] == MB_FUNC_READ_HOLDINGREGISTERS || rx_frame[1] == MB_FUNC_READ_INPUTREGISTERS)
-		{
+		if(rx_frame[1] == MB_FUNC_READ_HOLDINGREGISTERS || rx_frame[1] == MB_FUNC_READ_INPUTREGISTERS)
 			return modbus_read_func();
-		}
-		else if(rx_frame[1] == MB_FUNC_FORCE_COIL || rx_frame[1] == MB_FUNC_FORCE_NCOILS || rx_frame[1] == MB_FUNC_WRITE_NREGISTERS || rx_frame[1] == MB_FUNC_WRITE_REGISTER)
-		{
+		else if(rx_frame[1] == MB_FUNC_WRITE_NREGISTERS || rx_frame[1] == MB_FUNC_WRITE_REGISTER)
 			return modbus_write_func();
-		}
-		else return 0;
+		else
+			return modbus_error_illegalfunc();
 
 	} else return 0;
 }
@@ -100,45 +97,22 @@ Uint16 modbus_read_func(){
 	number_of_data = number_of_data|rx_frame[5];
 
 	//Number of bytes to follows
-	if(rx_frame[1] == MB_FUNC_READ_COIL || rx_frame[1] == MB_FUNC_READ_INPUT)
-		tx_frame[2] = (Uint16) ceil((double)number_of_data/8);
-	else
-		tx_frame[2] = (Uint16)(number_of_data*(Uint16)2);
+	tx_frame[2] = (Uint16)(number_of_data*(Uint16)2);
 
 	//Getting the data
 	while(i < tx_frame[2])
 	{
-		// Binary data?
-		if(rx_frame[1] == MB_FUNC_READ_COIL || rx_frame[1] == MB_FUNC_READ_INPUT)
-		{
-			for(j = 0; j < 8; j++)
-			{
-				Uint32 *addr = (Uint32 *)(data_address+i*8+j);
-				Uint32 addr_val = *addr;
-				if((i != tx_frame[2]) || (j < tx_frame[2])){
-					tx_frame[3+i] = tx_frame[3+i] | ((addr_val & 0x00000001) << j);
-				}
-				else{
-					tx_frame[3+i] = tx_frame[3+i] & (0 << i);
-				}
-			}
-			i++;
-		}
-		// 16 bits data (registers)?
-		else
-		{
-			Uint32 *addr = (Uint32 *)(data_address+i/2);
-			Uint32 addr_val = *addr;
+		Uint32 *addr = (Uint32 *)(data_address+i/2);
+		Uint32 addr_val = *addr;
 
-			for(j = 0; j < 4; j++){
-				tx_frame[3+(4*register_pos)+j] = (addr_val >> j*8) & 0x00FF;
-			}
-			swap_values(&tx_frame[3+(4*register_pos)],&tx_frame[3+(4*register_pos)+1]);
-			swap_values(&tx_frame[3+(4*register_pos)+2],&tx_frame[3+(4*register_pos)+3]);
-
-			i+=4;
-			register_pos++;
+		for(j = 0; j < 4; j++){
+			tx_frame[3+(4*register_pos)+j] = (addr_val >> j*8) & 0x00FF;
 		}
+		swap_values(&tx_frame[3+(4*register_pos)],&tx_frame[3+(4*register_pos)+1]);
+		swap_values(&tx_frame[3+(4*register_pos)+2],&tx_frame[3+(4*register_pos)+3]);
+
+		i+=4;
+		register_pos++;
 	}
 
 	// Actual frame length (counting the data)
@@ -158,7 +132,7 @@ Uint16 modbus_write_func(){
 	Uint16 data = 0;
 	Uint16 data_address = 0;
 	Uint16 crc = 0;
-	Uint16 i = 0, j = 0;
+	Uint16 i = 0;
 	Uint16 register_pos = 0;
 	Uint32 *addr = 0;
 
@@ -174,7 +148,7 @@ Uint16 modbus_write_func(){
 	tx_frame[2] = rx_frame[2];
 	tx_frame[3] = rx_frame[3];
 
-	if(rx_frame[1] == MB_FUNC_FORCE_COIL || rx_frame[1] == MB_FUNC_WRITE_REGISTER)
+	if(rx_frame[1] == MB_FUNC_WRITE_REGISTER)
 	{
 		// Get the data to be written
 		data = rx_frame[4] << 8;
@@ -187,7 +161,7 @@ Uint16 modbus_write_func(){
 		tx_frame[4] = (*(addr) & 0xFF00) >> 8;
 		tx_frame[5] = *(addr) & 0x00FF;
 	}
-	else if(rx_frame[1] == MB_FUNC_FORCE_NCOILS || rx_frame[1] == MB_FUNC_WRITE_NREGISTERS){
+	else if(rx_frame[1] == MB_FUNC_WRITE_NREGISTERS){
 		//Get the number of registers/coils to write
 		number_of_data = rx_frame[4] << 8;
 		number_of_data = number_of_data|rx_frame[5];
@@ -199,42 +173,33 @@ Uint16 modbus_write_func(){
 		//Writing the data
 		while(i < rx_frame[6])
 		{
-			// Binary data?
-			if(rx_frame[1] == MB_FUNC_FORCE_NCOILS)
-			{
-				for(j = 0; j < 8; j++)
-				{
-					Uint32 *addr = (Uint32 *)(data_address+i*8+j);
-					Uint32 addr_val = *addr;
-					if((i != tx_frame[2]) || (j < tx_frame[2])){
-						tx_frame[3+i] = tx_frame[3+i] | ((addr_val & 0x00000001) << j);
-					}
-					else{
-						tx_frame[3+i] = tx_frame[3+i] & (0 << i);
-					}
-				}
-				i++;
-			}
-			// 16 bits data (registers)?
-			else
-			{
-				//TODO: Check this sum routine
-				Uint32 address = data_address | register_pos;
-				addr = (Uint32 *)address;
-				*(addr) = (rx_frame[7+i] << 8) | rx_frame[8+i];
-				i+=2;
-				register_pos++;
-			}
+			//TODO: Check this sum routine
+			Uint32 address = data_address | register_pos;
+			addr = (Uint32 *)address;
+			*(addr) = (rx_frame[7+i] << 8) | rx_frame[8+i];
+			i+=2;
+			register_pos++;
 		}
 	}
 
 	// Generate CRC code
-	crc = generate_crc(tx_frame, 5);
+	crc = generate_crc(tx_frame, 6);
 
 	tx_frame[7] = (crc & 0xFF00) >> 8;
 	tx_frame[6] = crc & 0x00FF;
 
 	return 8;
+}
+
+Uint16 modbus_error_illegalfunc(){
+	Uint32 crc;
+	tx_frame[2] = 0x01; 				// Illegal function info
+	crc = generate_crc(tx_frame, 3);
+
+	tx_frame[4] = (crc & 0xFF00) >> 8;
+	tx_frame[3] = crc & 0x00FF;
+
+	return 5;
 }
 
 Uint16 generate_crc(Uint16 buf[], int len)
