@@ -64,6 +64,8 @@ void serial_send_data(){
 
 void serial_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity  )
 {
+	Uint32 baud;
+
 	// Map interrupts to the correct functions
 	PieVectTable.SCIRXINTA = &serial_interrupt_rx;
 	PieVectTable.SCITXINTA = &serial_interrupt_tx;
@@ -107,17 +109,17 @@ void serial_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity  )
 			SciaRegs.SCICCR.bit.PARITYENA = 0;
 	}
 
-	// Baud rate settings
+	// Baud rate settings - Automatic depending on ulBaudrate
 	#if (CPU_FRQ_150MHZ)
-	SciaRegs.SCIHBAUD    =0x0001;  // 9600 baud @LSPCLK = 37.5MHz.
-	SciaRegs.SCILBAUD    =0x00E7;
+	//@LSPCLK = 37.5MHz.
+	baud = ((Uint32) 37500000 / (ulBaudRate*8) - 1);
 	#endif
 	#if (CPU_FRQ_100MHZ)
-	SciaRegs.SCIHBAUD    =0x0001;  // 9600 baud @LSPCLK = 20MHz.
-	SciaRegs.SCILBAUD    =0x0044;
-
-
+	baud = ((Uint32) 20000000 / (ulBaudRate*8) - 1);
 	#endif
+
+	SciaRegs.SCIHBAUD = (baud & 0xFF00) >> 8;
+	SciaRegs.SCILBAUD = (baud & 0x00FF);
 
 	// Enable interrupts
 	PieCtrlRegs.PIECTRL.bit.ENPIE = 1;   // Enable the PIE block

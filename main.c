@@ -122,7 +122,7 @@ void main(void)
 // This function is found in DSP2833x_InitPeripherals.c
 // InitPeripherals(); // Not required for this example
 
-    modbus_init(9600,8,MB_PAR_NONE);
+    modbus_init(MB_BAUDRATE,MB_BITS_QNT,MB_PARITY);
 	for(;;)
     {
 

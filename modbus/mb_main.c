@@ -58,6 +58,8 @@ Uint16 modbus_prep_response()
 {
 	serial_interrupt_switch(0,1);
 	clear_tx_frame();
+
+	// Check if is the sent ID is the same of configured for the device
 	if(rx_frame[0] == MB_SLAVE_ID)
 	{
 		//Get Slave ID
@@ -175,7 +177,7 @@ Uint16 modbus_write_func(){
 		while(i < rx_frame[6])
 		{
 			//TODO: Check this sum routine
-			Uint32 address = data_address | register_pos;
+			Uint32 address = data_address | i/2;
 			addr = (Uint32 *)address;
 			*(addr) = (rx_frame[7+i] << 8) | rx_frame[8+i];
 			i+=2;
