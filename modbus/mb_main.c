@@ -79,8 +79,8 @@ Uint16 modbus_prep_response()
 	} else return 0;
 }
 
+/* Read the demanded data from the registers */
 Uint16 modbus_read_func(){
-	Uint16 data = 0;				// Stores the sent data
 	Uint16 data_address = 0;		// Stores the start address where the data will be put
 	Uint16 crc = 0;					// Stores CRC code
 
@@ -130,6 +130,8 @@ Uint16 modbus_read_func(){
 	frame_lenght += 2; // Adding to the size of frame length the 2 bytes of CRC
 	return frame_lenght;
 }
+
+/* Write the received data to the registers */
 Uint16 modbus_write_func(){
 	Uint16 data = 0;				// Stores the sent data
 	Uint16 data_address = 0;		// Stores the start address where the data will be put
@@ -163,7 +165,6 @@ Uint16 modbus_write_func(){
 	else if(rx_frame[1] == MB_FUNC_WRITE_NREGISTERS){
 		Uint16 i = 0;
 		Uint16 number_of_data = 0;
-		Uint16 register_pos = 0;
 
 		//Get the number of registers/coils to write
 		number_of_data = rx_frame[4] << 8;
@@ -173,15 +174,37 @@ Uint16 modbus_write_func(){
 		tx_frame[4] = rx_frame[4];
 		tx_frame[5] = rx_frame[5];
 
-		//Writing the data
-		while(i < rx_frame[6])
+		// Writing the data
+		// At f28335, a memory address points to a 32 bits registers. So address 0x8000
+		// and 0x8001 will point to the same data. To write at 0x8001 you'll need to set
+		// the high data of this 32 bits register (the last 16 bits)
+		while(i < number_of_data)
 		{
-			//TODO: Check this sum routine
-			Uint32 address = data_address | i/2;
+			Uint32 Hdata, Ldata;
+			Uint32 address = data_address + i;
 			addr = (Uint32 *)address;
-			*(addr) = (rx_frame[7+i] << 8) | rx_frame[8+i];
+
+			// Take the low data (first register)
+			Ldata = rx_frame[7 + i*2];
+			Ldata = (Ldata << 8*1) | rx_frame[7 + i*2 + 1];
+
+			// Take the high data (second register)
+			Hdata = rx_frame[7 + i*2 + 2];
+			Hdata = (Hdata << 8) | rx_frame[7 + i*2 + 3];
+
+			// Add both and put at the register:
+			// ==> If the quantity of registers is odd (1, for example), then maintain the high data of the last
+			// addressed register.
+			// ==> These address registers holds the data of two 16 bits registers (0x8000 and 0x8001, for example),
+			// so if the quantity is odd the last register high data don´t have to be written (0x8001 value will be
+			// maintained)
+			if(rx_frame[5] == (i+1))
+				*(addr) = (*(addr) & 0xFFFF0000) | Ldata;
+			// Else overwrite everything
+			else
+				*(addr) = (Hdata << 16) | Ldata;
+
 			i+=2;
-			register_pos++;
 		}
 	}
 
@@ -194,6 +217,8 @@ Uint16 modbus_write_func(){
 	return 8;
 }
 
+/* Generate an MODBUS Error message, depending on specified type (see the mb_main.h for the
+*  constants which make the types of errors */
 Uint16 modbus_error(Uint16 type){
 	Uint32 crc;
 
@@ -206,6 +231,8 @@ Uint16 modbus_error(Uint16 type){
 	return 5;
 }
 
+/* Generate the CRC code for the inserted buffer. The data (variable "buf") can have any
+ * length, but it has to be specified at variable "len" */
 Uint16 generate_crc(Uint16 buf[], int len)
 {
   Uint16 crc = 0xFFFF;

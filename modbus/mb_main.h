@@ -17,7 +17,7 @@
 // Settings
 // Modify this settings according to your project
 #define MB_SLAVE_ID				0x01			// Device ID
-#define MB_BAUDRATE 			57600			// Baud rate
+#define MB_BAUDRATE 			9600			// Baud rate
 #define MB_PARITY				MB_PAR_NONE		// Bits parity
 #define MB_BITS_QNT				8				// Bits quantity
 #define MB_FRAME_CHAR_TOTALS	512				// Quantity of chars at a frame
@@ -80,6 +80,7 @@ void clear_rx_frame();
 void clear_tx_frame();
 
 // Extern  / Global variables
+// The statement "extern" permits the use of the variable at any file which includes this header
 extern Uint16 rx_frame[MB_FRAME_CHAR_TOTALS];
 extern Uint16 rx_frame_pointer;
 extern Uint16 tx_frame[MB_FRAME_CHAR_TOTALS];

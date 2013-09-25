@@ -1,7 +1,7 @@
 ******************************************************************************
              TMS320C2000 Linker PC v6.1.0                      
 ******************************************************************************
->> Linked Mon Sep 16 13:45:34 2013
+>> Linked Wed Sep 25 14:09:45 2013
 
 OUTPUT FILE NAME:   <modbus.out>
 ENTRY POINT SYMBOL: "code_start"  address: 00000000
@@ -15,7 +15,7 @@ PAGE 0:
   BEGIN                 00000000   00000002  00000002  00000000  RWIX
   RAMM0                 00000050   000003b0  00000000  000003b0  RWIX
   RAML0                 00008000   00001000  0000004e  00000fb2  RWIX
-  RAML1                 00009000   00009000  00000983  0000867d  RWIX
+  RAML1                 00009000   00009000  000009a0  00008660  RWIX
   ZONE7A                00200000   0000fc00  00000000  0000fc00  RWIX
   CSM_RSVD              0033ff80   00000076  00000000  00000076  RWIX
   CSM_PWL               0033fff8   00000008  00000000  00000008  RWIX
@@ -107,25 +107,25 @@ ramfuncs   0    0000802f    0000001f
                   0000802f    0000001b     DSP2833x_SysCtrl.obj (ramfuncs)
                   0000804a    00000004     DSP2833x_usDelay.obj (ramfuncs)
 
-.text      0    00009000    00000983     
+.text      0    00009000    000009a0     
                   00009000    00000316     DSP2833x_DefaultIsr.obj (.text:retain)
-                  00009316    00000222     mb_main.obj (.text)
-                  00009538    000000f3     DSP2833x_SysCtrl.obj (.text)
-                  0000962b    000000a4     mb_serial.obj (.text)
-                  000096cf    00000074     DSP2833x_CpuTimers.obj (.text)
-                  00009743    00000070     DSP2833x_Sci.obj (.text)
-                  000097b3    00000051     mb_serial.obj (.text:retain)
-                  00009804    0000004c     mb_timer.obj (.text)
-                  00009850    00000046     rts2800_fpu32.lib : boot.obj (.text)
-                  00009896    0000003b     mb_timer.obj (.text:retain)
-                  000098d1    00000028     DSP2833x_PieCtrl.obj (.text)
-                  000098f9    00000020     DSP2833x_PieVect.obj (.text)
-                  00009919    00000019     rts2800_fpu32.lib : args_main.obj (.text)
-                  00009932    00000019                       : exit.obj (.text)
-                  0000994b    00000016     main.obj (.text)
-                  00009961    00000011     rts2800_fpu32.lib : ull_tofs.obj (.text)
-                  00009972    00000009                       : _lock.obj (.text)
-                  0000997b    00000008     DSP2833x_CodeStartBranch.obj (.text)
+                  00009316    00000240     mb_main.obj (.text)
+                  00009556    000000f3     DSP2833x_SysCtrl.obj (.text)
+                  00009649    000000a4     mb_serial.obj (.text)
+                  000096ed    00000074     DSP2833x_CpuTimers.obj (.text)
+                  00009761    00000070     DSP2833x_Sci.obj (.text)
+                  000097d1    00000051     mb_serial.obj (.text:retain)
+                  00009822    0000004c     mb_timer.obj (.text)
+                  0000986e    00000046     rts2800_fpu32.lib : boot.obj (.text)
+                  000098b4    0000003b     mb_timer.obj (.text:retain)
+                  000098ef    00000028     DSP2833x_PieCtrl.obj (.text)
+                  00009917    00000020     DSP2833x_PieVect.obj (.text)
+                  00009937    00000019     rts2800_fpu32.lib : args_main.obj (.text)
+                  00009950    00000019                       : exit.obj (.text)
+                  00009969    00000015     main.obj (.text)
+                  0000997e    00000011     rts2800_fpu32.lib : ull_tofs.obj (.text)
+                  0000998f    00000009                       : _lock.obj (.text)
+                  00009998    00000008     DSP2833x_CodeStartBranch.obj (.text)
 
 csm_rsvd   0    0033ff80    00000000     DSECT
 
@@ -356,13 +356,13 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 address    name
 --------   ----
 00009000   .text
-00009932   C$$EXIT
-00009961   ULL$$TOFS
+00009950   C$$EXIT
+0000997e   ULL$$TOFS
 000090e6   _ADCINT_ISR
 00380080   _ADC_cal
 00000b00   _AdcMirror
 00007100   _AdcRegs
-00009708   _ConfigCpuTimer
+00009726   _ConfigCpuTimer
 0000c450   _CpuTimer0
 00000c00   _CpuTimer0Regs
 0000c440   _CpuTimer1
@@ -371,7 +371,7 @@ address    name
 00000c10   _CpuTimer2Regs
 0033fff8   _CsmPwl
 00000ae0   _CsmRegs
-000095fa   _CsmUnlock
+00009618   _CsmUnlock
 00009014   _DATALOG_ISR
 00009208   _DINTCH1_ISR
 00009212   _DINTCH2_ISR
@@ -381,7 +381,7 @@ address    name
 0000923a   _DINTCH6_ISR
 0000804a   _DSP28x_usDelay
 00000880   _DevEmuRegs
-0000954b   _DisableDog
+00009569   _DisableDog
 00001000   _DmaRegs
 00009294   _ECAN0INTA_ISR
 000092a8   _ECAN0INTB_ISR
@@ -432,7 +432,7 @@ address    name
 000091c2   _EQEP2_INT_ISR
 00006b00   _EQep1Regs
 00006b40   _EQep2Regs
-000098f0   _EnableInterrupts
+0000990e   _EnableInterrupts
 00000a80   _FlashRegs
 00006f80   _GpioCtrlRegs
 00006fc0   _GpioDataRegs
@@ -443,18 +443,18 @@ address    name
 0000903c   _ILLEGAL_ISR
 00009000   _INT13_ISR
 0000900a   _INT14_ISR
-000096cf   _InitCpuTimers
+000096ed   _InitCpuTimers
 0000802f   _InitFlash
-0000959f   _InitPeripheralClocks
-000098d1   _InitPieCtrl
-000098f9   _InitPieVectTable
-00009553   _InitPll
-00009743   _InitSci
-00009744   _InitSciGpio
-0000974b   _InitSciaGpio
-00009761   _InitScibGpio
-0000979d   _InitScicGpio
-00009538   _InitSysCtrl
+000095bd   _InitPeripheralClocks
+000098ef   _InitPieCtrl
+00009917   _InitPieVectTable
+00009571   _InitPll
+00009761   _InitSci
+00009762   _InitSciGpio
+00009769   _InitSciaGpio
+0000977f   _InitScibGpio
+000097bb   _InitScicGpio
+00009556   _InitSysCtrl
 000092f8   _LUF_ISR
 000092ee   _LVF_ISR
 000091f4   _MRINTA_ISR
@@ -483,7 +483,7 @@ address    name
 00007050   _SciaRegs
 00007750   _ScibRegs
 00007770   _ScicRegs
-00009541   _ServiceDog
+0000955f   _ServiceDog
 00007040   _SpiaRegs
 00007010   _SysCtrlRegs
 000090f0   _TINT0_ISR
@@ -515,55 +515,55 @@ address    name
 ffffffff   ___binit__
 ffffffff   ___c_args__
 00008000   ___cinit__
-00009983   ___etext__
+000099a0   ___etext__
 ffffffff   ___pinit__
 00009000   ___text__
-00009919   __args_main
+00009937   __args_main
 0000c45c   __cleanup_ptr
 0000c45e   __dtors_ptr
 0000c45a   __lock
-0000997a   __nop
-00009976   __register_lock
-00009972   __register_unlock
+00009997   __nop
+00009993   __register_lock
+0000998f   __register_unlock
 00000400   __stack
 0000c458   __unlock
-00009932   _abort
-00009850   _c_int00
-00009505   _clear_rx_frame
-00009517   _clear_tx_frame
-00009934   _exit
-000094b6   _generate_crc
-0000994b   _main
-000094e0   _memory_map
+00009950   _abort
+0000986e   _c_int00
+00009523   _clear_rx_frame
+00009535   _clear_tx_frame
+00009952   _exit
+000094d4   _generate_crc
+00009969   _main
+000094fe   _memory_map
 0000933c   _modbus_chk_states
-0000949b   _modbus_error
+000094b9   _modbus_error
 00009316   _modbus_init
 00009362   _modbus_prep_response
 0000938a   _modbus_read_func
 0000c002   _modbus_state
 0000c004   _modbus_usTimerT35
-00009418   _modbus_write_func
-00009500   _reset_data_pointers
+00009417   _modbus_write_func
+0000951e   _reset_data_pointers
 0000930c   _rsvd_ISR
 0000c240   _rx_frame
 0000c001   _rx_frame_pointer
-00009669   _serial_init
-000097b3   _serial_interrupt_rx
-0000962b   _serial_interrupt_switch
-000097f3   _serial_interrupt_tx
-00009642   _serial_send_data
-00009529   _swap_values
-00009812   _timer_disable
-00009804   _timer_enable
-00009819   _timer_init
-00009896   _timer_interrupt
-0000980d   _timer_reset
+00009687   _serial_init
+000097d1   _serial_interrupt_rx
+00009649   _serial_interrupt_switch
+00009811   _serial_interrupt_tx
+00009660   _serial_send_data
+00009547   _swap_values
+00009830   _timer_disable
+00009822   _timer_enable
+00009837   _timer_init
+000098b4   _timer_interrupt
+0000982b   _timer_reset
 0000c040   _tx_frame
 0000c000   _tx_frame_pointer
 ffffffff   binit
 00008000   cinit
 00000000   code_start
-00009983   etext
+000099a0   etext
 ffffffff   pinit
 
 
@@ -713,52 +713,52 @@ address    name
 0000933c   _modbus_chk_states
 00009362   _modbus_prep_response
 0000938a   _modbus_read_func
-00009418   _modbus_write_func
-0000949b   _modbus_error
-000094b6   _generate_crc
-000094e0   _memory_map
-00009500   _reset_data_pointers
-00009505   _clear_rx_frame
-00009517   _clear_tx_frame
-00009529   _swap_values
-00009538   _InitSysCtrl
-00009541   _ServiceDog
-0000954b   _DisableDog
-00009553   _InitPll
-0000959f   _InitPeripheralClocks
-000095fa   _CsmUnlock
-0000962b   _serial_interrupt_switch
-00009642   _serial_send_data
-00009669   _serial_init
-000096cf   _InitCpuTimers
-00009708   _ConfigCpuTimer
-00009743   _InitSci
-00009744   _InitSciGpio
-0000974b   _InitSciaGpio
-00009761   _InitScibGpio
-0000979d   _InitScicGpio
-000097b3   _serial_interrupt_rx
-000097f3   _serial_interrupt_tx
-00009804   _timer_enable
-0000980d   _timer_reset
-00009812   _timer_disable
-00009819   _timer_init
-00009850   _c_int00
-00009896   _timer_interrupt
-000098d1   _InitPieCtrl
-000098f0   _EnableInterrupts
-000098f9   _InitPieVectTable
-00009919   __args_main
-00009932   C$$EXIT
-00009932   _abort
-00009934   _exit
-0000994b   _main
-00009961   ULL$$TOFS
-00009972   __register_unlock
-00009976   __register_lock
-0000997a   __nop
-00009983   ___etext__
-00009983   etext
+00009417   _modbus_write_func
+000094b9   _modbus_error
+000094d4   _generate_crc
+000094fe   _memory_map
+0000951e   _reset_data_pointers
+00009523   _clear_rx_frame
+00009535   _clear_tx_frame
+00009547   _swap_values
+00009556   _InitSysCtrl
+0000955f   _ServiceDog
+00009569   _DisableDog
+00009571   _InitPll
+000095bd   _InitPeripheralClocks
+00009618   _CsmUnlock
+00009649   _serial_interrupt_switch
+00009660   _serial_send_data
+00009687   _serial_init
+000096ed   _InitCpuTimers
+00009726   _ConfigCpuTimer
+00009761   _InitSci
+00009762   _InitSciGpio
+00009769   _InitSciaGpio
+0000977f   _InitScibGpio
+000097bb   _InitScicGpio
+000097d1   _serial_interrupt_rx
+00009811   _serial_interrupt_tx
+00009822   _timer_enable
+0000982b   _timer_reset
+00009830   _timer_disable
+00009837   _timer_init
+0000986e   _c_int00
+000098b4   _timer_interrupt
+000098ef   _InitPieCtrl
+0000990e   _EnableInterrupts
+00009917   _InitPieVectTable
+00009937   __args_main
+00009950   C$$EXIT
+00009950   _abort
+00009952   _exit
+00009969   _main
+0000997e   ULL$$TOFS
+0000998f   __register_unlock
+00009993   __register_lock
+00009997   __nop
+000099a0   ___etext__
+000099a0   etext
 0000c000   _tx_frame_pointer
 0000c001   _rx_frame_pointer
 0000c002   _modbus_state
