@@ -26,7 +26,7 @@
 
 // DON´T MODIFY THE CODE BELOW!
 
-// Parity codes
+// Parity constants
 #define MB_PAR_EVEN			1
 #define MB_PAR_ODD 			2
 #define MB_PAR_NONE			0
@@ -62,22 +62,22 @@
 #define MB_STATE_SENDING		4
 
 // Modbus core functions
-void modbus_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity );
-void modbus_chk_states();
-Uint16 modbus_prep_response();
-Uint16 modbus_read_func();
-Uint16 modbus_write_func();
-Uint16 modbus_error(Uint16 type);
+void modbus_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity );	// Initialize MODBUS
+void modbus_chk_states();			// "FSM" for checking the actual state and take the right action
+Uint16 modbus_prep_response();		// Prepare a response to send to the server
+Uint16 modbus_read_func();			// Function to read data from DSP
+Uint16 modbus_write_func();			// Function to write data to DSP
+Uint16 modbus_error(Uint16 type);	// Prepare a frame to send info about an error to the server
 
 // Modbus auxiliary
-Uint16 generate_crc(Uint16 buf[], int len);
-Uint32 memory_map(Uint16 type);
-void reset_data_pointers();
+Uint16 generate_crc(Uint16 buf[], int len);		// Generate CRC code
+Uint32 memory_map(Uint16 type);					// Give the memory map (the allowed start address)
+void reset_data_pointers();						// Resets the rx_frame and tx_frame data pointers
 
 // Utilities
-void swap_values(Uint16 *val1, Uint16 *val2);
-void clear_rx_frame();
-void clear_tx_frame();
+void swap_values(Uint16 *val1, Uint16 *val2);	// Swap the val1 to val2 and val2 to val1
+void clear_rx_frame();							// Clear the rx_frame (zeroing all the frame)
+void clear_tx_frame();							// Clear the tx_frame (zeroing all the frame)
 
 // Extern  / Global variables
 // The statement "extern" permits the use of the variable at any file which includes this header

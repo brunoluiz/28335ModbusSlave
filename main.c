@@ -123,10 +123,7 @@ void main(void)
 // InitPeripherals(); // Not required for this example
 
     modbus_init(MB_BAUDRATE,MB_BITS_QNT,MB_PARITY);
-	for(;;)
-    {
-
-    }
+	while(1);
 
 }
 

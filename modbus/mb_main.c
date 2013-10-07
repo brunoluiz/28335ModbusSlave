@@ -14,14 +14,26 @@ Uint16 tx_frame_pointer = 0;
 Uint32 modbus_usTimerT35 = 0;
 Uint16 modbus_state = MB_STATE_T35;
 
+/*
+ * Initialize the MODBUS
+ * - ulBaudRate: select the preferred baudRaute
+ * - ucDataBits: number of bytes which MODBUS will transmit (common: 8 bits)
+ * - eParity: the type of parity used (check the mb_main.h - it will have constants for it - the common is NONE)
+ */
 void modbus_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity )
 {
+
+	// Allows some modifications on protected registers
 	EALLOW;
 	DINT;
 
+	// Initialize serial - check the mb_serial for more info
 	serial_init(ulBaudRate, ucDataBits, eParity);
+	// Defined timing for the 3.5char time
 	modbus_usTimerT35 = ( 7UL * 220000UL ) / ( 2UL * ulBaudRate );
+	// Turns off read and transmission of serial (will be reenabled on timer_init)
 	serial_interrupt_switch(0, 0);
+	// Initialize the timer - it starts the receiver
 	timer_init(modbus_usTimerT35);
 
 	EDIS;
@@ -29,6 +41,14 @@ void modbus_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity )
 	ERTM;
 }
 
+/*
+ * MODBUS STATES
+ * - It will start at MB_STATE_T35, enabling the receiver and going to WAITING state
+ * - When it is waiting for data it will be at STATE_WAITING (which does nothing)
+ * - When it changes to STATE_READING it will prepare the next state (SEND) and will enable the transmitter
+ * - When it is transmitting, it will be at STATE_T35_SEND. At the end, it will turn of the receiver
+ * and transmitter and will go to STATE_T35
+ */
 void modbus_chk_states()
 {
     if(modbus_state == MB_STATE_T35)
@@ -54,9 +74,20 @@ void modbus_chk_states()
     }
 }
 
+/*
+ * Prepares the data to send
+ * - Check if the contents from rx_frame are valid (function code and slave ID)
+ * - Based on function code it sends it to read_func or write_func
+ * - These *_func will process the data and will return an 0 or any number (which will be the size of the tx_frame)
+ * - If the value is different from 0 it will transmit the data (check the serial_send_data from mb_serial.c)
+ * - Otherwise it would not transmit anything
+ */
 Uint16 modbus_prep_response()
 {
+	// Disable receiver, enable transmitter
 	serial_interrupt_switch(0,1);
+
+	// Clear the tx_frame
 	clear_tx_frame();
 
 	// Check if is the sent ID is the same of configured for the device
@@ -68,7 +99,7 @@ Uint16 modbus_prep_response()
 		//Get Function Code
 		tx_frame[1] = rx_frame[1];
 
-		//Check if function code is for read data
+		//Check if function code is for read data or write data
 		if(rx_frame[1] == MB_FUNC_READ_HOLDINGREGISTERS || rx_frame[1] == MB_FUNC_READ_INPUTREGISTERS)
 			return modbus_read_func();
 		else if(rx_frame[1] == MB_FUNC_WRITE_NREGISTERS || rx_frame[1] == MB_FUNC_WRITE_REGISTER)
@@ -102,18 +133,23 @@ Uint16 modbus_read_func(){
 	//Number of bytes to follows
 	tx_frame[2] = (Uint16)(number_of_data*(Uint16)2);
 
-	//Getting the data
+	//Getting the data, based on the number of bytes required (specified at tx_frame[2])
 	while(i < tx_frame[2])
 	{
+		// Points to the start data address + iterator
 		Uint32 *addr = (Uint32 *)(data_address+i/2);
+		// Get the value from this data address
 		Uint32 addr_val = *addr;
 
+		// Iterates through all 8 bit data and put it the tx_frame
 		for(j = 0; j < 4; j++){
 			tx_frame[3+(4*register_pos)+j] = (addr_val >> j*8) & 0x00FF;
 		}
+		// Swap the values (it will be inverted, so it will revert)
 		swap_values(&tx_frame[3+(4*register_pos)],&tx_frame[3+(4*register_pos)+1]);
 		swap_values(&tx_frame[3+(4*register_pos)+2],&tx_frame[3+(4*register_pos)+3]);
 
+		// Increment the iterators
 		i+=4;
 		register_pos++;
 	}
@@ -124,6 +160,7 @@ Uint16 modbus_read_func(){
 	// Generate CRC code
 	crc = generate_crc(tx_frame, frame_lenght);
 
+	// Put the CRC code at tx_frame
 	tx_frame[frame_lenght+1] 		= (crc & 0xFF00) >> 8;
 	tx_frame[frame_lenght] 	= crc & 0x00FF;
 
@@ -262,7 +299,7 @@ Uint16 generate_crc(Uint16 buf[], int len)
 
 Uint32 memory_map(Uint16 type){
 	// The addresses 0x8000 to 0x10000 are RAM
-	// The addresses 0x0000 to 0x00800 are RAM too, but more limited
+	// The addresses 0x0000 to 0x00800 are RAM too, but they are too limited
 	if(type == MB_FUNC_READ_COIL || type == MB_FUNC_FORCE_COIL || type == MB_FUNC_FORCE_NCOILS){
 		return 0x00000;
 	}
@@ -279,18 +316,26 @@ Uint32 memory_map(Uint16 type){
 		return 0x0000;
 }
 
+/*
+ * Resets the data pointers for rx_frame and tx_frame
+ */
 void reset_data_pointers(){
 	rx_frame_pointer = 0;
 	tx_frame_pointer = 0;
 }
 
+/*
+ * Clears the rx_frame, by zeroing all data
+ */
 void clear_rx_frame(){
-	// Clears RX frame
 	int i;
 	for(i = 0; i < MB_FRAME_CHAR_TOTALS; i++)
 		rx_frame[i] = 0;
 }
 
+/*
+ * Clears the tx_frame, by zeroing all data
+ */
 void clear_tx_frame(){
 	// Clears TX frame
 	int i;
@@ -298,6 +343,9 @@ void clear_tx_frame(){
 		tx_frame[i] = 0;
 }
 
+/*
+ * Swap values from va1 to val2 and val2 to val1
+ */
 void swap_values(Uint16 *val1, Uint16 *val2){
 	Uint16 temp = *val1;
 	*val1 = *val2;
