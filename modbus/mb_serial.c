@@ -16,17 +16,24 @@
  */
 interrupt void serial_interrupt_rx()
 {
-	timer_reset();
+	//timer_disable();
 
 	// Change the actual state for "reading"
 	modbus_state = MB_STATE_READING;
 
 	// Put the receive data at rx_frame and increase the location pointer
-	rx_frame[rx_frame_pointer] = SciaRegs.SCIRXBUF.all;
-	rx_frame_pointer++;
+	for(rx_frame_pointer=0; rx_frame_pointer< 8; rx_frame_pointer++)
+	{
+	   rx_frame[rx_frame_pointer] = SciaRegs.SCIRXBUF.all;
+	}
 
 	//Clears the interrupt
+	SciaRegs.SCIFFRX.bit.RXFFOVRCLR=1;   // Clear Overflow flag-
+	SciaRegs.SCIFFRX.bit.RXFFINTCLR=1;   // Clear Interrupt flag
 	PieCtrlRegs.PIEACK.all|=0x100;
+
+	timer_reset();
+	//timer_enable();
 }
 
 /*
@@ -35,7 +42,11 @@ interrupt void serial_interrupt_rx()
  */
 interrupt void serial_interrupt_tx()
 {
+	serial_send_data();
+	serial_interrupt_switch(1,0);
+
 	//Clears the interrupt
+	SciaRegs.SCIFFTX.bit.TXFFINTCLR=1;
 	PieCtrlRegs.PIEACK.all|=0x100;
 }
 
@@ -48,15 +59,15 @@ void serial_interrupt_switch( Uint16 xRxEnable, Uint16 xTxEnable )
 {
 	//Enable or disable RX (receiver) interrupt
 	if(xRxEnable)
-		SciaRegs.SCICTL2.bit.RXBKINTENA =1;
+		SciaRegs.SCIFFRX.bit.RXFFIENA =1;
 	else
-		SciaRegs.SCICTL2.bit.RXBKINTENA =0;
+		SciaRegs.SCIFFRX.bit.RXFFIENA =0;
 
 	//Enable or disable TX (transmiter) interrupt
 	if(xTxEnable)
-		SciaRegs.SCICTL2.bit.TXINTENA =1;
+		SciaRegs.SCIFFTX.bit.TXFFIENA =1;
 	else
-		SciaRegs.SCICTL2.bit.TXINTENA =0;
+		SciaRegs.SCIFFTX.bit.TXFFIENA =0;
 }
 
 /*
@@ -80,8 +91,6 @@ void serial_send_data(){
 		{
 			// Send tx_fram to TX Buffer
 			SciaRegs.SCITXBUF= tx_frame[i];
-			// Wait until it was fully sent
-			while (!SciaRegs.SCICTL2.bit.TXEMPTY) {}
 		}
 
 	}
@@ -158,6 +167,13 @@ void serial_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity  )
 	SciaRegs.SCIHBAUD = (baud & 0xFF00) >> 8;
 	SciaRegs.SCILBAUD = (baud & 0x00FF);
 
+	// TODO: FIFO configuration
+	// SciaRegs.SCIFFTX.all=0xC028;
+	// SciaRegs.SCIFFRX.all=0x0028;
+	SciaRegs.SCIFFRX.all=0x0028;	// Will buffer 8 words and then interrupt and read data
+	SciaRegs.SCIFFTX.all=0xC027;	// Will buffer 11 words and then interrupt and send data
+	SciaRegs.SCIFFCT.all=0x00;
+
 	// Enable interrupts
 	PieCtrlRegs.PIECTRL.bit.ENPIE = 1;   // Enable the PIE block
 	PieCtrlRegs.PIEIER9.bit.INTx1=1;     // PIE Group 9, int1
@@ -166,4 +182,12 @@ void serial_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity  )
 
 	// Relinquish SCI from Reset state
 	SciaRegs.SCICTL1.all =0x0023;
+
+	// TODO: comment here
+	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
+	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
+}
+
+void serial_tx_frame_calc(Uint16 data_lenght){
+	SciaRegs.SCIFFTX.bit.TXFFIL = 7+data_lenght;
 }

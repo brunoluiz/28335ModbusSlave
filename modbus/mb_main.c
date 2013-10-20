@@ -102,7 +102,7 @@ Uint16 modbus_prep_response()
 		//Check if function code is for read data or write data
 		if(rx_frame[1] == MB_FUNC_READ_HOLDINGREGISTERS || rx_frame[1] == MB_FUNC_READ_INPUTREGISTERS)
 			return modbus_read_func();
-		else if(rx_frame[1] == MB_FUNC_WRITE_NREGISTERS || rx_frame[1] == MB_FUNC_WRITE_REGISTER)
+		else if(rx_frame[1] == MB_FUNC_WRITE_REGISTER)
 			return modbus_write_func();
 		else
 			return modbus_error(MB_ERROR_ILLEGALFUNC);
@@ -129,6 +129,10 @@ Uint16 modbus_read_func(){
 	//Get the number of data to get
 	number_of_data = rx_frame[4] << 8;
 	number_of_data = number_of_data|rx_frame[5];
+
+	// As it uses FIFO, it needs to specify how many data will be placed at FIFO.
+	// The default will consider one register, but this function recalculate for more registers (up to 6)
+	serial_tx_frame_calc(number_of_data);
 
 	//Number of bytes to follows
 	tx_frame[2] = (Uint16)(number_of_data*(Uint16)2);

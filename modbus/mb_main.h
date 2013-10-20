@@ -23,7 +23,6 @@
 #define MB_FRAME_CHAR_TOTALS	512				// Quantity of chars at a frame
 
 
-
 // DON´T MODIFY THE CODE BELOW!
 
 // Parity constants

@@ -12,6 +12,7 @@
 void serial_init(Uint32 ulBaudRate, Uint16 ucDataBits, Uint16 eParity );	// Init the serial
 void serial_interrupt_switch( Uint16 xRxEnable, Uint16 xTxEnable );			// Enable or disable the receiver and transmitter
 void serial_send_data();					// Send data
+void serial_tx_frame_calc(Uint16 data_lenght);
 interrupt void serial_interrupt_rx();		// Manage receiver interrupt
 interrupt void serial_interrupt_tx();		// Manage transmitter interrupt
 
