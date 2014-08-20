@@ -1,22 +1,7 @@
 #ifndef MODBUS_H_
 #define MODBUS_H_
 
-// Definition to x86 or DSP executable
-#if X86_DEBUG
-	typedef int Uint8;
-	typedef int Uint16;
-	typedef int Uint32;
-	typedef int64 Uint64;
-#else
-	#include "DSP28x_Project.h"
-#endif
-
-// Bool definition for C
-#ifndef bool
-	#define false   0
-	#define true    1
-	#define bool Uint16
-#endif
+#include "PlataformSettings.h"
 
 // Settings ==========================
 // Modify this settings according to your project
@@ -30,7 +15,7 @@
 
 // Log settings =======================
 // Will be used at Log.h
-#define X86_DEBUG	0
+#define DEBUG_LOG_ENABLED	0
 
 #define MB_DATA_REQUEST_DEBUG_ENABLED		0
 #define MB_DATA_RESPONSE_DEBUG_ENABLED		0

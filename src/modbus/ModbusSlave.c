@@ -5,7 +5,6 @@
 #include "Log.h"
 #include "crc.h"
 #include "stdlib.h"
-//#include "stdio.h"
 
 void slave_loopStates(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
@@ -84,9 +83,9 @@ void slave_timerT35Wait(ModbusSlave *self){
 void slave_idle(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
-	if ( self->serial.rxBufferStatus() == self->dataRequest.size(&self->dataRequest) ){
-		self->state = MB_RECEIVE;
-	}
+	while ( self->serial.rxBufferStatus() != self->dataRequest.size(&self->dataRequest) ){ }
+
+	self->state = MB_RECEIVE;
 }
 
 void slave_receive(ModbusSlave *self){
@@ -133,7 +132,6 @@ void slave_process(ModbusSlave *self){
 	if (generatedCrc != receivedCrc) {
 		MB_SLAVE_DEBUG("Error on CRC!");
 		self->dataHandler.exception(self, MB_ERROR_ILLEGALDATA);
-		return ;
 	}
 
 	// Requested slave address must be equal of pre-defined ID
@@ -156,6 +154,8 @@ void slave_process(ModbusSlave *self){
 		MB_SLAVE_DEBUG("Exception: ILLEGALFUNC");
 		self->dataHandler.exception(self, MB_ERROR_ILLEGALFUNC);
 	}
+
+	self->state = MB_TRANSMIT;
 }
 
 void slave_transmit(ModbusSlave *self){
@@ -168,6 +168,8 @@ void slave_transmit(ModbusSlave *self){
 	
 	self->serial.setSerialTxEnabled(&self->serial, true);
 	self->serial.transmitData(transmitString, transmitStringSize);
+
+	self->state = MB_START;
 }
 
 void slave_destroy(ModbusSlave *self){

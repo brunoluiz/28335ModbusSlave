@@ -3,18 +3,19 @@
 #include "Log.h"
 
 void datahandler_readInputRegisters(ModbusSlave *slave){
-	Uint16 numberOfBytes = slave->dataRequest.totalDataRequested;
+	// Each requested register has two bytes inside of it, so the code has to multiply by 2
+	Uint16 numberOfBytes = slave->dataRequest.totalDataRequested * 2;
+	static Uint16 counter = 0x00;
 
-	// Points to the start data address + iterator
-	Uint16 * startAddress = (Uint16 *)(slave->dataRequest.firstDataAddress);
-	// Get the value from this data address
-	Uint16 startAddressVal = *startAddress;
+	slave->dataResponse.slaveAddress = MODBUS_SLAVE_ID;
+	slave->dataResponse.functionCode = MB_FUNC_READ_HOLDINGREGISTERS;
+	slave->dataResponse.numberOfBytes = numberOfBytes;
+	slave->dataResponse.content = 0xCAFE + counter;
 
+	slave->dataResponse.crc = generateCrc(slave->dataResponse.getTransmitStringWithoutCRC(&slave->dataResponse),
+			slave->dataResponse.sizeWithoutCRC(&slave->dataResponse));
 
-	Uint16 content = startAddressVal;
-
-	slave->dataResponse.content = content;
-
+	counter++;
 	MB_DATA_HANDLER_DEBUG();
 }
 

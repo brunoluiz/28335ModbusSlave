@@ -46,6 +46,24 @@ Uint16 response_sizeWithoutCRC(ModbusDataResponse *self){
 	return string;
 }
 
+
+ Uint16 * response_getTransmitStringWithoutCRC(ModbusDataResponse *self){
+	static Uint16 * string;
+	string = (Uint16 *) calloc(self->size(self), sizeof(Uint16));
+
+	string[0] = self->slaveAddress;
+
+	string[1] = self->functionCode;
+
+	string[2] = self->numberOfBytes;
+
+	string[3] = (self->content & 0xFF00) >> 8;
+	string[4] = self->content & 0x00FF;
+
+	MB_DATA_RESPONSE_DEBUG();
+	return string;
+}
+
 ModbusDataResponse construct_ModbusDataResponse(){
 	ModbusDataResponse modbusDataResponse;
 
@@ -59,6 +77,7 @@ ModbusDataResponse construct_ModbusDataResponse(){
 	modbusDataResponse.size = response_size;
 	modbusDataResponse.sizeWithoutCRC = response_sizeWithoutCRC;
 	modbusDataResponse.getTransmitString = response_getTransmitString;
+	modbusDataResponse.getTransmitStringWithoutCRC = response_getTransmitStringWithoutCRC;
 
 	MB_DATA_RESPONSE_DEBUG();
 

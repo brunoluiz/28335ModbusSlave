@@ -1,21 +1,21 @@
+#include "PlataformSettings.h"
 #include "Serial.h"
-// #include "Modbus.h"
 #include "Log.h"
 
 // Clear flags of overflow
 void serial_clear(){
 	SERIAL_DEBUG();
 
-	// Clear overflow flag
+	// Clear FIFO Rxoverflow flag
 	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;
 
 	// Reset FIFO
-	// TODO: check if it is needed
-//	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
+	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
+	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
 
 	// Clear interruptions
-//	SciaRegs.SCIFFRX.bit.RXFFINTCLR=1;
-//	SciaRegs.SCIFFTX.bit.TXFFINTCLR=1;
+	SciaRegs.SCIFFRX.bit.RXFFINTCLR=1;
+	SciaRegs.SCIFFTX.bit.TXFFINTCLR=1;
 
 }
 
@@ -43,13 +43,27 @@ void serial_setSerialTxEnabled(Serial *self, bool status){
 void serial_init(Serial *self){
 	Uint32 baudrate;
 
-	InitSciaGpio();
+	// InitSciaGpio();
 
-	self->setSerialRxEnabled(self, false);
-	self->setSerialTxEnabled(self, false);
+	// FIFO TX configurations
+	// 0:4 	Interruption level: 0
+	// 6	Clear interruption flag
+	// 13	FIFO Reset
+	// 14	FIFO Enabled
+	// 15	SCI Reset tx/rx
+	SciaRegs.SCIFFTX.all=0xE040;
+
+	// FIFO RX configurations
+	// 0:4 	Interruption level: 16 bits
+	// 6	Clear interruption flag
+	// 13	FIFO Reset
+	SciaRegs.SCIFFRX.all=0x204f;
+
+	// FIFO Control configurations
+	SciaRegs.SCIFFCT.all=0x00;
 
 	// Number of bytes
-	switch(self->bitsNumber){
+	switch(self->bitsNumber) {
 		case 8:
 			SciaRegs.SCICCR.bit.SCICHAR = 0x7;
 			break;
@@ -77,42 +91,32 @@ void serial_init(Serial *self){
 			SciaRegs.SCICCR.bit.PARITYENA = 0;
 	}
 
+	// TODO: Check why the baud rate settings is returning a wrong value
 	// Baud rate settings - Automatic depending on ulBaudrate
-	#if (CPU_FRQ_150MHZ)
-	//@LSPCLK = 37.5MHz.
-	baudrate = ((Uint32) 37500000 / (self->baudrate*8) - 1);
-	#endif
-	#if (CPU_FRQ_100MHZ)
-	baudrate = ((Uint32) 20000000 / (self->baudrate*8) - 1);
-	#endif
+//	#if (CPU_FRQ_150MHZ)
+//	//@LSPCLK = 37.5MHz.
+//	baudrate = (Uint32) ((Uint32) ((Uint32) 37500000 / (Uint32) (self->baudrate*8) ) - 1);
+//	#endif
+//	#if (CPU_FRQ_100MHZ)
+//	baudrate = (Uint32) ((Uint32) ((Uint32) 20000000 / (self->baudrate*8)) - 1);
+//	#endif
 
 	// Configure the High and Low baud rate registers
-	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
-	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
+//	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
+//	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
 
-	// TODO: FIFO configuration in one single register
-	SciaRegs.SCIFFTX.bit.SCIRST 	= 0;
-	SciaRegs.SCIFFTX.bit.SCIRST 	= 1;
-	SciaRegs.SCIFFTX.bit.SCIFFENA 	= 1; // Enable FIFO
-	SciaRegs.SCIFFRX.bit.RXFFIENA 	= 0; // Interruption disabled
-	SciaRegs.SCIFFTX.bit.TXFFIENA 	= 0; // Interruption disabled
-//	SciaRegs.SCIFFTX.bit.TXFFIL 	= 7; // Buffer have 7 words before overflow (1 byte only)
-//	SciaRegs.SCIFFRX.bit.RXFFIL 	= 8; // Buffer have 8 words before overflow
+	SciaRegs.SCIHBAUD    =0x0001;  // 9600 baud @LSPCLK = 37.5MHz.
+	SciaRegs.SCILBAUD    =0x00E7;
 
-	// TODO: check if is needed (low priority)
-	SciaRegs.SCIFFCT.all=0x00;
+	SciaRegs.SCICTL2.bit.TXINTENA 	= 0;
+	SciaRegs.SCICTL2.bit.RXBKINTENA = 0;
 
-	// Relinquish SCI from Reset state
-//	SciaRegs.SCICTL1.all =0x0023;
-//	SciaRegs.SCICTL1.bit.RXENA 		= 0;
-//	SciaRegs.SCICTL1.bit.TXENA 		= 0;
+	// Disable RX and TX temporarily
+	self->setSerialRxEnabled(self, false);
+	self->setSerialTxEnabled(self, false);
+
+	// Reset the serial
 	SciaRegs.SCICTL1.bit.SWRESET 	= 1;
-
-	// Reset FIFO
-	SciaRegs.SCIFFTX.bit.TXFIFOXRESET = 0;
-	SciaRegs.SCIFFRX.bit.RXFIFORESET  = 0;
-	SciaRegs.SCIFFTX.bit.TXFIFOXRESET = 1;
-	SciaRegs.SCIFFRX.bit.RXFIFORESET  = 1;
 
 	SERIAL_DEBUG();
 }
