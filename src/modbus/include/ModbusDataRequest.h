@@ -14,14 +14,12 @@ struct ModbusDataRequest {
 
 	void (*clear)(ModbusDataRequest *self);
 	Uint16 (*size)(ModbusDataRequest *self);
-	Uint16 (*sizeWithoutCRC)(ModbusDataRequest *self);
 	Uint16 * (*getReceivedString)(ModbusDataRequest *self);
 	Uint16 * (*getReceivedStringWithoutCRC)(ModbusDataRequest *self);
 };
 
 void request_clear(ModbusDataRequest *self);
 Uint16 request_size(ModbusDataRequest *self);
-Uint16 request_sizeWithoutCRC(ModbusDataRequest *self);
 Uint16 * request_getReceivedString(ModbusDataRequest *self);
 Uint16 * request_getReceivedStringWithoutCRC(ModbusDataRequest *self);
 ModbusDataRequest construct_ModbusDataRequest();

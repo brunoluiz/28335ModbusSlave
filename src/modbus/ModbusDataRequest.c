@@ -21,11 +21,6 @@ Uint16 request_size(ModbusDataRequest *self){
 	return 8;
 }
 
-Uint16 request_sizeWithoutCRC(ModbusDataRequest *self){
-	MB_DATA_REQUEST_DEBUG();
-	return 6;
-}
-
 Uint16 * request_getReceivedString(ModbusDataRequest *self) {
 	static Uint16 * string;
 	string = (Uint16 *) calloc(self->size(self), sizeof(Uint16));
@@ -76,7 +71,6 @@ ModbusDataRequest construct_ModbusDataRequest(){
 
 	modbusDataRequest.clear = request_clear;
 	modbusDataRequest.size = request_size;
-	modbusDataRequest.sizeWithoutCRC = request_sizeWithoutCRC;
 	modbusDataRequest.getReceivedString = request_getReceivedString;
 	modbusDataRequest.getReceivedStringWithoutCRC = request_getReceivedStringWithoutCRC;
 
