@@ -115,6 +115,9 @@ void serial_init(Serial *self){
 	self->setSerialRxEnabled(self, false);
 	self->setSerialTxEnabled(self, false);
 
+	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
+	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
+
 	// Reset the serial
 	SciaRegs.SCICTL1.bit.SWRESET 	= 1;
 

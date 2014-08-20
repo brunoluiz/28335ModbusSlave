@@ -15,14 +15,14 @@ void datahandler_readInputRegisters(ModbusSlave *slave){
 	slave->dataResponse.numberOfBytes = numberOfBytes;
 
 	for (addressIterator = 0; addressIterator < totalDataRequested; addressIterator++){
-		slave->dataResponse.content[addressIterator] = 0xCAFE + (addressIterator*counter);
+		slave->dataResponse.content[addressIterator] = (addressIterator+1)*counter;
 	}
+	counter++;
 
 	sizeWithoutCRC = slave->dataResponse.size(&slave->dataResponse) - 2;
 	slave->dataResponse.crc = generateCrc( slave->dataResponse.getTransmitStringWithoutCRC(&slave->dataResponse),
 			sizeWithoutCRC);
 
-	counter++;
 	MB_DATA_HANDLER_DEBUG();
 }
 
