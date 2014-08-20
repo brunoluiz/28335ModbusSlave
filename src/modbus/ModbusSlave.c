@@ -63,6 +63,9 @@ void slave_start(ModbusSlave *self){
 
 	self->timer.resetTimer();
 	
+	self->dataRequest.clear(&self->dataRequest);
+	self->dataResponse.clear(&self->dataResponse);
+
 	self->serial.setSerialRxEnabled(&self->serial, false);
 	self->serial.setSerialTxEnabled(&self->serial, false);
 
@@ -168,6 +171,7 @@ void slave_transmit(ModbusSlave *self){
 	
 	self->serial.setSerialTxEnabled(&self->serial, true);
 	self->serial.transmitData(transmitString, transmitStringSize);
+	self->serial.clear();
 
 	self->state = MB_START;
 }

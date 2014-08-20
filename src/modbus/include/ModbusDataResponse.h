@@ -9,6 +9,7 @@ struct ModbusDataResponse {
 	Uint16 slaveAddress;
 	Uint16 functionCode;
 	Uint16 numberOfBytes;
+	Uint16 exceptionCode;
 	Uint16 * content;
 	Uint16 crc;
 
@@ -22,6 +23,7 @@ void response_clear(ModbusDataResponse *self);
 Uint16 response_size(ModbusDataResponse *self);
 Uint16 * response_getTransmitString(ModbusDataResponse *self);
 Uint16 * response_getTransmitStringWithoutCRC(ModbusDataResponse *self);
+Uint16 * response_exception(ModbusDataResponse *self);
 ModbusDataResponse construct_ModbusDataResponse();
 
 #endif

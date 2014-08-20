@@ -15,7 +15,7 @@ void datahandler_readInputRegisters(ModbusSlave *slave){
 	slave->dataResponse.numberOfBytes = numberOfBytes;
 
 	for (addressIterator = 0; addressIterator < totalDataRequested; addressIterator++){
-		slave->dataResponse.content[addressIterator] = 0xCAFE + (addressIterator);
+		slave->dataResponse.content[addressIterator] = 0xCAFE + (addressIterator*counter);
 	}
 
 	sizeWithoutCRC = slave->dataResponse.size(&slave->dataResponse) - 2;
@@ -31,6 +31,14 @@ void datahandler_presetSingleRegister(ModbusSlave *slave){
 }
 
 void datahandler_exception(ModbusSlave *slave, ModbusError exceptionCode){
+	Uint16 sizeWithoutCRC;
+
+	slave->dataResponse.slaveAddress = MODBUS_SLAVE_ID;
+	slave->dataResponse.functionCode = slave->dataRequest.functionCode;
+	slave->dataResponse.exceptionCode = exceptionCode;
+
+	slave->dataResponse.crc = generateCrc(slave->dataResponse.getTransmitStringWithoutCRC(&slave->dataResponse), 3);
+
 	MB_DATA_HANDLER_DEBUG();
 }
 
