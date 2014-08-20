@@ -1,9 +1,24 @@
-#ifndef SERIAL_H_
-#define SERIAL_H_
+#ifndef MODBUS_SERIAL_H_
+#define MODBUS_SERIAL_H_
 
 #include "Modbus.h"
 
 typedef struct Serial Serial;
+
+#ifndef SERIAL_BAUDRATE
+#define SERIAL_BAUDRATE 9600
+#endif
+
+#ifndef SERIAL_BITS_NUMBER
+#define SERIAL_BITS_NUMBER 8
+#endif
+
+// Parity constants
+ typedef enum {
+	SERIAL_PARITY_EVEN,
+	SERIAL_PARITY_ODD,
+	SERIAL_PARITY_NONE
+} SerialParity;
 
 struct Serial {
 	Uint16 bitsNumber;
@@ -12,11 +27,9 @@ struct Serial {
 	bool fifoEnabled;
 	bool rxEnabled;
 	bool txEnabled;
-	bool interruptionsEnabled;
 
-	void (*setupInterruptions)();
 	void (*clear)();
-	bool (*rxOverflow)();
+	Uint16 (*rxBufferStatus)();
 	void (*setSerialRxEnabled)(Serial *self, bool status);
 	void (*setSerialTxEnabled)(Serial *self, bool status);
 	void (*init)(Serial *self);
@@ -24,9 +37,8 @@ struct Serial {
 	Uint16 (*getRxBufferedWord)();
 };
 
-void serial_setupInterruptions();
 void serial_clear();
-bool serial_rxOverflow();
+Uint16 serial_rxBufferStatus();
 void serial_setSerialRxEnabled(Serial *self, bool status);
 void serial_setSerialTxEnabled(Serial *self, bool status);
 void serial_init(Serial *self);

@@ -36,3 +36,4 @@ Uint16 generateCrc(Uint16 buf[], int len)
 }
 
 #endif /* CRC_UTIL_H_ */
+

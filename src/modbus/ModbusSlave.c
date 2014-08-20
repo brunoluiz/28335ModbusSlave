@@ -5,8 +5,7 @@
 #include "Log.h"
 #include "crc.h"
 #include "stdlib.h"
-
-#include "stdio.h"
+//#include "stdio.h"
 
 void slave_loopStates(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
@@ -52,18 +51,17 @@ void slave_create(ModbusSlave *self){
 	self->serial.baudrate		= MODBUS_BAUDRATE;
 	self->serial.bitsNumber		= MODBUS_BITS_QNT;
 	self->serial.fifoEnabled	= MODBUS_FIFO_ENABLED;
-	self->serial.parityType		= MODBUS_PARITY;
-	self->serial.setSerialRxEnabled(&self->serial, false);
-	self->serial.setSerialTxEnabled(&self->serial, false);
+	self->serial.parityType		= SERIAL_PARITY_NONE;
 	self->serial.init(&self->serial);
 
-	self->timer.reloadTime = 100000;
-	self->timer.init(&self->timer);
+	self->timer.init(&self->timer, MODBUS_T35);
 
 	self->state = MB_START;
 }
 
 void slave_start(ModbusSlave *self){
+	MB_SLAVE_DEBUG();
+
 	self->timer.resetTimer();
 	
 	self->serial.setSerialRxEnabled(&self->serial, false);
@@ -76,7 +74,7 @@ void slave_start(ModbusSlave *self){
 void slave_timerT35Wait(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
-	if ( self->timer.expiredTimer() ){
+	if ( self->timer.expiredTimer(&self->timer) ) {
 		self->serial.setSerialRxEnabled(&self->serial, true);
 		self->timer.stop();
 		self->state = MB_IDLE;
@@ -86,7 +84,7 @@ void slave_timerT35Wait(ModbusSlave *self){
 void slave_idle(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
-	if ( self->serial.rxOverflow() ){
+	if ( self->serial.rxBufferStatus() == self->dataRequest.size(&self->dataRequest) ){
 		self->state = MB_RECEIVE;
 	}
 }
@@ -123,21 +121,22 @@ void slave_receive(ModbusSlave *self){
 }
 
 void slave_process(ModbusSlave *self){
-	//TODO: CRC CHECK
+	// First things first: check if the CRC is OK
+	// If it is not, throw an error!
 	Uint16 receivedCrc = self->dataRequest.crc;
 	Uint16 generatedCrc = 0x0;
 	Uint16 sizeWithoutCrc = self->dataRequest.size(&self->dataRequest) - 2;
-
 	generatedCrc = generateCrc(self->dataRequest.getReceivedStringWithoutCRC(&self->dataRequest),
 		sizeWithoutCrc);
 
 	// Check if the received CRC is equal to CRC locally generated
 	if (generatedCrc != receivedCrc) {
 		MB_SLAVE_DEBUG("Error on CRC!");
-		return self->dataHandler.exception(self, MB_ERROR_ILLEGALDATA);
+		self->dataHandler.exception(self, MB_ERROR_ILLEGALDATA);
+		return ;
 	}
 
-	// Slave address of request must be equal of pre-defined ID
+	// Requested slave address must be equal of pre-defined ID
 	if (self->dataRequest.slaveAddress != MODBUS_SLAVE_ID){
 		MB_SLAVE_DEBUG("Request is not for this device!");
 		self->state = MB_START;
@@ -147,29 +146,28 @@ void slave_process(ModbusSlave *self){
 	// Check the function code and do some action
 	if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS){
 		MB_SLAVE_DEBUG("Reading holding registers");
-		return self->dataHandler.readInputRegisters(self);
+		self->dataHandler.readInputRegisters(self);
 	}
 	else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER){
 		MB_SLAVE_DEBUG("Presetting holding registers");
-		return self->dataHandler.presetSingleRegister(self);
+		self->dataHandler.presetSingleRegister(self);
 	}
 	else {
 		MB_SLAVE_DEBUG("Exception: ILLEGALFUNC");
-		return self->dataHandler.exception(self, MB_ERROR_ILLEGALFUNC);
+		self->dataHandler.exception(self, MB_ERROR_ILLEGALFUNC);
 	}
 }
 
 void slave_transmit(ModbusSlave *self){
 	Uint16 transmitStringSize = self->dataResponse.size(&self->dataResponse);
 	Uint16 * transmitString = (Uint16 *) calloc(transmitStringSize, sizeof(Uint16));
-	int i = 0;
+
+	MB_SLAVE_DEBUG();
 
 	transmitString = self->dataResponse.getTransmitString(&self->dataResponse);
 	
 	self->serial.setSerialTxEnabled(&self->serial, true);
 	self->serial.transmitData(transmitString, transmitStringSize);
-
-	MB_SLAVE_DEBUG();
 }
 
 void slave_destroy(ModbusSlave *self){
@@ -178,6 +176,8 @@ void slave_destroy(ModbusSlave *self){
 
 ModbusSlave construct_ModbusSlave(){
 	ModbusSlave modbusSlave;
+
+	MB_SLAVE_DEBUG();
 
 	modbusSlave.state = MB_CREATE;
 	modbusSlave.dataRequest = construct_ModbusDataRequest();
@@ -196,8 +196,6 @@ ModbusSlave construct_ModbusSlave(){
 	modbusSlave.process = slave_process;
 	modbusSlave.transmit = slave_transmit;
 	modbusSlave.destroy = slave_destroy;
-
-	MB_SLAVE_DEBUG();
 
 	return modbusSlave;
 }

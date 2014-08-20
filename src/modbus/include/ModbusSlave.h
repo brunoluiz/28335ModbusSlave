@@ -5,8 +5,10 @@
 #include "ModbusDataRequest.h"
 #include "ModbusDataResponse.h"
 #include "ModbusDataHandler.h"
-#include "ModbusSerial.h"
-#include "ModbusTimer.h"
+#include "Serial.h"
+#include "Timer.h"
+
+// typedef struct ModbusSlave ModbusSlave;
 
 struct ModbusSlave {
 	ModbusState state;
@@ -30,8 +32,6 @@ struct ModbusSlave {
 	void (*destroy)(ModbusSlave *self);
 };
 
-typedef struct ModbusSlave ModbusSlave;
-
 void slave_loopStates(ModbusSlave *self);
 void slave_create(ModbusSlave *self);
 void slave_start(ModbusSlave *self);
@@ -43,6 +43,6 @@ void slave_transmit(ModbusSlave *self);
 void slave_destroy(ModbusSlave *self);
 ModbusSlave construct_ModbusSlave();
 
-extern ModbusSlave modbus;
+// extern ModbusSlave modbus;
 
 #endif

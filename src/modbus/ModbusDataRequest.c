@@ -1,6 +1,6 @@
 #include "ModbusDataRequest.h"
-#include "stdlib.h"
 #include "Log.h"
+#include "stdlib.h"
 
 void request_clear(ModbusDataRequest *self){
 	MB_DATA_REQUEST_DEBUG();
@@ -84,3 +84,4 @@ ModbusDataRequest construct_ModbusDataRequest(){
 
 	return modbusDataRequest;
 }
+
