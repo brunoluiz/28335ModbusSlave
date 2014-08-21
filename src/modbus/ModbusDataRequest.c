@@ -6,7 +6,7 @@ void request_clear(ModbusDataRequest *self){
 	MB_DATA_REQUEST_DEBUG();
 	self->slaveAddress = 0;
 	self->functionCode = 0;
-	self->firstDataAddress = 0;
+	self->dataAddress = 0;
 	self->totalDataRequested = 0;
 	self->crc = 0;
 }
@@ -29,8 +29,8 @@ Uint16 * request_getReceivedString(ModbusDataRequest *self) {
 	
 	string[1] = self->functionCode;
 	
-	string[2] = (self->firstDataAddress & 0xFF00) >> 8;
-	string[3] = self->firstDataAddress & 0x00FF;
+	string[2] = (self->dataAddress & 0xFF00) >> 8;
+	string[3] = self->dataAddress & 0x00FF;
 
 	string[4] = (self->totalDataRequested & 0xFF00) >> 8;
 	string[5] = self->totalDataRequested & 0x00FF;
@@ -50,8 +50,8 @@ Uint16 * request_getReceivedStringWithoutCRC(ModbusDataRequest *self) {
 	
 	string[1] = self->functionCode;
 	
-	string[2] = (self->firstDataAddress & 0xFF00) >> 8;
-	string[3] = self->firstDataAddress & 0x00FF;
+	string[2] = (self->dataAddress & 0xFF00) >> 8;
+	string[3] = self->dataAddress & 0x00FF;
 
 	string[4] = (self->totalDataRequested & 0xFF00) >> 8;
 	string[5] = self->totalDataRequested & 0x00FF;
@@ -65,7 +65,7 @@ ModbusDataRequest construct_ModbusDataRequest(){
 
 	modbusDataRequest.slaveAddress = 0;
 	modbusDataRequest.functionCode = 0;
-	modbusDataRequest.firstDataAddress = 0;
+	modbusDataRequest.dataAddress = 0;
 	modbusDataRequest.totalDataRequested = 0;
 	modbusDataRequest.crc = 0;
 

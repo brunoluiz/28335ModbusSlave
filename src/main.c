@@ -2,11 +2,13 @@
 #include "Modbus.h"
 #include "PlataformSettings.h"
 
-int main(){
-	ModbusSlave mb = construct_ModbusSlave();
+ModbusSlave mb;
 
+int main(){
 	InitSysCtrl();
 	InitSciaGpio();
+
+	mb = construct_ModbusSlave();
 
 	while(1) {
 		mb.loopStates(&mb);

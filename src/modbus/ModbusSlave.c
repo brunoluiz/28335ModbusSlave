@@ -3,7 +3,7 @@
 #include "ModbusDataResponse.h"
 #include "Modbus.h"
 #include "Log.h"
-#include "crc.h"
+#include "Crc.h"
 #include "stdlib.h"
 
 void slave_loopStates(ModbusSlave *self){
@@ -94,7 +94,7 @@ void slave_idle(ModbusSlave *self){
 
 void slave_receive(ModbusSlave *self){
 	// Treat received serial data, pushing out of buffer
-	Uint16 request_firstDataAddress;
+	Uint16 request_dataAddress;
 	Uint16 request_totalDataRequested;
 	Uint16 request_crcRequest;
 
@@ -103,13 +103,19 @@ void slave_receive(ModbusSlave *self){
 	self->dataRequest.slaveAddress = self->serial.getRxBufferedWord();
 	self->dataRequest.functionCode = self->serial.getRxBufferedWord();
 
-	request_firstDataAddress = self->serial.getRxBufferedWord() << 8;
-	request_firstDataAddress = request_firstDataAddress | self->serial.getRxBufferedWord();
-	self->dataRequest.firstDataAddress = request_firstDataAddress;
+	request_dataAddress = self->serial.getRxBufferedWord() << 8;
+	request_dataAddress = request_dataAddress | self->serial.getRxBufferedWord();
+	self->dataRequest.dataAddress = request_dataAddress;
 
-	request_totalDataRequested = self->serial.getRxBufferedWord() << 8;
-	request_totalDataRequested = request_totalDataRequested | self->serial.getRxBufferedWord();
-	self->dataRequest.totalDataRequested = request_totalDataRequested;
+//	if (self->dataRequest.functionCode = MB_FUNC_WRITE_HOLDINGREGISTER){
+//		request_dataToWrite = self->serial.getRxBufferedWord() << 8;
+//		request_dataToWrite = request_totalDataRequested | self->serial.getRxBufferedWord();
+//		self->dataRequest.dataToWrite = request_dataToWrite;
+//	} else {
+		request_totalDataRequested = self->serial.getRxBufferedWord() << 8;
+		request_totalDataRequested = request_totalDataRequested | self->serial.getRxBufferedWord();
+		self->dataRequest.totalDataRequested = request_totalDataRequested;
+//	}
 	
 	request_crcRequest = self->serial.getRxBufferedWord() << 8;
 	request_crcRequest = request_crcRequest | self->serial.getRxBufferedWord();

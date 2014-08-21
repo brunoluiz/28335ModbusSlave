@@ -8,7 +8,7 @@ typedef struct ModbusDataRequest ModbusDataRequest;
 struct ModbusDataRequest {
 	Uint16 slaveAddress;
 	Uint16 functionCode;
-	Uint16 firstDataAddress;
+	Uint16 dataAddress;
 	Uint16 totalDataRequested;
 	Uint16 crc;
 
