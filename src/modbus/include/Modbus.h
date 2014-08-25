@@ -69,4 +69,26 @@ typedef enum {
 	MB_ERROR_GATEWAYPATHUN
 } ModbusError;
 
+typedef enum {
+	MB_READ_ADDRESS_HIGH,
+	MB_READ_ADDRESS_LOW,
+	MB_READ_TOTALDATA_HIGH,
+	MB_READ_TOTALDATA_LOW
+} ModbusContentReadIndexes;
+
+
+typedef enum {
+	MB_WRITE_ADDRESS_HIGH,
+	MB_WRITE_ADDRESS_LOW,
+	MB_WRITE_VALUE_HIGH,
+	MB_WRITE_VALUE_LOW
+} ModbusContentWriteIndexes;
+
+#define MB_SIZE_COMMON_DATA_wo_CRC	2 // Slave address (1 byte) + Function Code (1 byte)
+#define MB_SIZE_COMMON_DATA			4 // Slave address (1 byte) + Function Code (1 byte) + CRC (2 bytes)
+#define MB_SIZE_COMMON_RESP_READ	MB_SIZE_COMMON_DATA + 1 // MB_SIZE_COMMON_DATA + Number of requested registers (1 byte)
+#define MB_SIZE_RESP_WRITE			MB_SIZE_COMMON_DATA + 4 // MB_SIZE_COMMON_DATA + Data address (2 bytes) + Value writen (2 bytes)
+#define MB_SIZE_FUNC_READ			8
+#define MB_SIZE_EXCEPTION			5
+
 #endif /* MODBUS_H_ */

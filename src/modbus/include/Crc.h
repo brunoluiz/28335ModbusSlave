@@ -3,9 +3,9 @@
 
 #include "PlataformSettings.h"
 
-Uint16 generateCrc(Uint16 buf[], int len);
+Uint16 generateCrc(Uint16 * buf, int len);
 
-Uint16 generateCrc(Uint16 buf[], int len)
+Uint16 generateCrc(Uint16 * buf, int len)
 {
   Uint16 crc = 0xFFFF;
   Uint16 temp = 0;

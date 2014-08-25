@@ -1,10 +1,9 @@
 #include "ModbusSlave.h"
-#include "ModbusDataRequest.h"
-#include "ModbusDataResponse.h"
+#include "ModbusData.h"
+#include "ModbusData.h"
 #include "Modbus.h"
 #include "Log.h"
 #include "Crc.h"
-#include "stdlib.h"
 
 void slave_loopStates(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
@@ -87,7 +86,7 @@ void slave_timerT35Wait(ModbusSlave *self){
 void slave_idle(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
-	while ( self->serial.rxBufferStatus() != self->dataRequest.size(&self->dataRequest) ){ }
+	while ( self->serial.rxBufferStatus() != 8 ){ }
 
 	self->state = MB_RECEIVE;
 }
@@ -103,19 +102,10 @@ void slave_receive(ModbusSlave *self){
 	self->dataRequest.slaveAddress = self->serial.getRxBufferedWord();
 	self->dataRequest.functionCode = self->serial.getRxBufferedWord();
 
-	request_dataAddress = self->serial.getRxBufferedWord() << 8;
-	request_dataAddress = request_dataAddress | self->serial.getRxBufferedWord();
-	self->dataRequest.dataAddress = request_dataAddress;
-
-//	if (self->dataRequest.functionCode = MB_FUNC_WRITE_HOLDINGREGISTER){
-//		request_dataToWrite = self->serial.getRxBufferedWord() << 8;
-//		request_dataToWrite = request_totalDataRequested | self->serial.getRxBufferedWord();
-//		self->dataRequest.dataToWrite = request_dataToWrite;
-//	} else {
-		request_totalDataRequested = self->serial.getRxBufferedWord() << 8;
-		request_totalDataRequested = request_totalDataRequested | self->serial.getRxBufferedWord();
-		self->dataRequest.totalDataRequested = request_totalDataRequested;
-//	}
+	self->dataRequest.content[0] = self->serial.getRxBufferedWord();
+	self->dataRequest.content[1] = self->serial.getRxBufferedWord();
+	self->dataRequest.content[2] = self->serial.getRxBufferedWord();
+	self->dataRequest.content[3] = self->serial.getRxBufferedWord();
 	
 	request_crcRequest = self->serial.getRxBufferedWord() << 8;
 	request_crcRequest = request_crcRequest | self->serial.getRxBufferedWord();
@@ -126,29 +116,30 @@ void slave_receive(ModbusSlave *self){
 	// Disable serial receiving
 	self->serial.setSerialRxEnabled(&self->serial, false);
 
+	if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS, MB_FUNC_WRITE_HOLDINGREGISTER){
+		self->dataRequest.size = MB_SIZE_FUNC_READ;
+	}
+
 	self->state = MB_PROCESS;
 }
 
 void slave_process(ModbusSlave *self){
-	// First things first: check if the CRC is OK
-	// If it is not, throw an error!
 	Uint16 receivedCrc = self->dataRequest.crc;
-	Uint16 generatedCrc = 0x0;
-	Uint16 sizeWithoutCrc = self->dataRequest.size(&self->dataRequest) - 2;
-	generatedCrc = generateCrc(self->dataRequest.getReceivedStringWithoutCRC(&self->dataRequest),
+	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
+	Uint16 generatedCrc = generateCrc(self->dataRequest.getTransmitStringWithoutCRC(&self->dataRequest),
 		sizeWithoutCrc);
-
-	// Check if the received CRC is equal to CRC locally generated
-	if (generatedCrc != receivedCrc) {
-		MB_SLAVE_DEBUG("Error on CRC!");
-		self->dataHandler.exception(self, MB_ERROR_ILLEGALDATA);
-	}
 
 	// Requested slave address must be equal of pre-defined ID
 	if (self->dataRequest.slaveAddress != MODBUS_SLAVE_ID){
 		MB_SLAVE_DEBUG("Request is not for this device!");
 		self->state = MB_START;
 		return ;
+	}
+
+	// Check if the received CRC is equal to CRC locally generated
+	if (generatedCrc != receivedCrc) {
+		MB_SLAVE_DEBUG("Error on CRC!");
+		self->dataHandler.exception(self, MB_ERROR_ILLEGALDATA);
 	}
 
 	// Check the function code and do some action
@@ -160,6 +151,10 @@ void slave_process(ModbusSlave *self){
 		MB_SLAVE_DEBUG("Presetting holding registers");
 		self->dataHandler.presetSingleRegister(self);
 	}
+//	else if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS){
+//		MB_SLAVE_DEBUG("Presetting holding registers");
+//		self->dataHandler.presetSingleRegister(self);
+//	}
 	else {
 		MB_SLAVE_DEBUG("Exception: ILLEGALFUNC");
 		self->dataHandler.exception(self, MB_ERROR_ILLEGALFUNC);
@@ -169,17 +164,11 @@ void slave_process(ModbusSlave *self){
 }
 
 void slave_transmit(ModbusSlave *self){
-	Uint16 transmitStringSize = self->dataResponse.size(&self->dataResponse);
-	Uint16 * transmitString = (Uint16 *) calloc(transmitStringSize, sizeof(Uint16));
-
 	MB_SLAVE_DEBUG();
-
-	transmitString = self->dataResponse.getTransmitString(&self->dataResponse);
 	
 	self->serial.setSerialTxEnabled(&self->serial, true);
-	self->serial.transmitData(transmitString, transmitStringSize);
-
-	free(transmitString);
+	self->serial.transmitData(self->dataResponse.getTransmitString(&self->dataResponse),
+			self->dataResponse.size);
 
 	self->state = MB_START;
 }
@@ -194,8 +183,8 @@ ModbusSlave construct_ModbusSlave(){
 	MB_SLAVE_DEBUG();
 
 	modbusSlave.state = MB_CREATE;
-	modbusSlave.dataRequest = construct_ModbusDataRequest();
-	modbusSlave.dataResponse = construct_ModbusDataResponse();
+	modbusSlave.dataRequest = construct_ModbusData();
+	modbusSlave.dataResponse = construct_ModbusData();
 	modbusSlave.serial = construct_Serial();
 	modbusSlave.timer = construct_Timer();
 

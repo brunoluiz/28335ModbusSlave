@@ -2,8 +2,8 @@
 #define MODBUS_SLAVE_H_
 
 #include "Modbus.h"
-#include "ModbusDataRequest.h"
-#include "ModbusDataResponse.h"
+#include "ModbusData.h"
+#include "ModbusData.h"
 #include "ModbusDataHandler.h"
 #include "Serial.h"
 #include "Timer.h"
@@ -13,8 +13,8 @@
 struct ModbusSlave {
 	ModbusState state;
 
-	ModbusDataRequest dataRequest;
-	ModbusDataResponse dataResponse;
+	ModbusData dataRequest;
+	ModbusData dataResponse;
 
 	Serial serial;
 	Timer timer;
