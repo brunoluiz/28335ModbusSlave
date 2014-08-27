@@ -1,3 +1,4 @@
+#include "Modbus.h"
 #include "ModbusData.h"
 #include "Log.h"
 
@@ -5,6 +6,8 @@ void response_clear(ModbusData *self){
 	MB_DATA_RESPONSE_DEBUG();
 	self->slaveAddress = 0;
 	self->functionCode = 0;
+	self->size = 0;
+	self->contentIdx = 0;
 	self->crc = 0;
 }
 
@@ -36,7 +39,7 @@ void response_clear(ModbusData *self){
 	string[stringIndex++] = self->slaveAddress;
 	string[stringIndex++] = self->functionCode;
 
-	for(contentIterator = 0; contentIterator < (self->size - MB_SIZE_COMMON_DATA_wo_CRC); contentIterator++){
+	for(contentIterator = 0; contentIterator < (self->size - MB_SIZE_COMMON_DATA); contentIterator++){
 		string[stringIndex++] = (self->content[contentIterator]);
 	}
 
@@ -49,8 +52,8 @@ ModbusData construct_ModbusData(){
 
 	modbusData.slaveAddress = 0;
 	modbusData.functionCode = 0;
+	modbusData.contentIdx = 0;
 	modbusData.crc = 0;
-
 	modbusData.size = 0;
 
 	modbusData.clear = response_clear;

@@ -1,4 +1,3 @@
-#include "PlataformSettings.h"
 #include "Serial.h"
 #include "Log.h"
 
@@ -7,15 +6,15 @@ void serial_clear(){
 	SERIAL_DEBUG();
 
 	// Clear FIFO Rxoverflow flag
-	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;
+//	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;
 
 	// Reset FIFO
 	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
 	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
 
 	// Clear interruptions
-	SciaRegs.SCIFFRX.bit.RXFFINTCLR=1;
-	SciaRegs.SCIFFTX.bit.TXFFINTCLR=1;
+//	SciaRegs.SCIFFRX.bit.RXFFINTCLR=1;
+//	SciaRegs.SCIFFTX.bit.TXFFINTCLR=1;
 
 }
 
@@ -25,17 +24,15 @@ Uint16 serial_rxBufferStatus(){
 }
 
 // Enable or disable RX (receiver)
-void serial_setSerialRxEnabled(Serial *self, bool status){
+void serial_setSerialRxEnabled(bool status){
 	SERIAL_DEBUG();
 	SciaRegs.SCICTL1.bit.RXENA = status;
-	self->rxEnabled = status;
 }
 
 // Enable or disable TX (trasmiter)
-void serial_setSerialTxEnabled(Serial *self, bool status){
+void serial_setSerialTxEnabled(bool status){
 	SERIAL_DEBUG();
 	SciaRegs.SCICTL1.bit.TXENA = status;
-	self->txEnabled = status;
 
 }
 
@@ -43,7 +40,7 @@ void serial_setSerialTxEnabled(Serial *self, bool status){
 void serial_init(Serial *self){
 	Uint32 baudrate;
 
-	// InitSciaGpio();
+	InitSciaGpio();
 
 	// FIFO TX configurations
 	// 0:4 	Interruption level: 0
@@ -100,20 +97,21 @@ void serial_init(Serial *self){
 //	#if (CPU_FRQ_100MHZ)
 //	baudrate = (Uint32) ((Uint32) ((Uint32) 20000000 / (self->baudrate*8)) - 1);
 //	#endif
-
-	// Configure the High and Low baud rate registers
+//
+//	// Configure the High and Low baud rate registers
 //	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
 //	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
 
-	SciaRegs.SCIHBAUD    =0x0001;  // 9600 baud @LSPCLK = 37.5MHz.
-	SciaRegs.SCILBAUD    =0x00E7;
+	SciaRegs.SCIHBAUD    =0x0000;  // 9600 baud @LSPCLK = 37.5MHz.
+	SciaRegs.SCILBAUD    =0x0027;
 
-	SciaRegs.SCICTL2.bit.TXINTENA 	= 0;
-	SciaRegs.SCICTL2.bit.RXBKINTENA = 0;
+	// Enable Interruptions
+//	SciaRegs.SCICTL2.bit.TXINTENA 	= 0;
+//	SciaRegs.SCICTL2.bit.RXBKINTENA = 0;
 
 	// Disable RX and TX temporarily
-	self->setSerialRxEnabled(self, false);
-	self->setSerialTxEnabled(self, false);
+	self->setSerialRxEnabled(false);
+	self->setSerialTxEnabled(false);
 
 	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
 	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
@@ -150,12 +148,10 @@ Serial construct_Serial(){
 	Serial serial;
 
 	serial.bitsNumber	= SERIAL_BITS_NUMBER;
-	serial.parityType	= SERIAL_PARITY_NONE;
+	serial.parityType	= SERIAL_PARITY;
 	serial.baudrate 	= SERIAL_BAUDRATE;
 
-	serial.fifoEnabled = true;
-	serial.rxEnabled = false;
-	serial.txEnabled = false;
+	serial.fifoWaitBuffer = 0;
 
 	serial.clear = serial_clear;
 	serial.rxBufferStatus = serial_rxBufferStatus;

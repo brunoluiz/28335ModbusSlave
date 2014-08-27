@@ -1,12 +1,11 @@
-#include "ModbusSlave.h"
-#include "Modbus.h"
 #include "PlataformSettings.h"
+#include "Modbus.h"
+#include "ModbusSlave.h"
 
 ModbusSlave mb;
 
 int main(){
 	InitSysCtrl();
-	InitSciaGpio();
 
 	mb = construct_ModbusSlave();
 

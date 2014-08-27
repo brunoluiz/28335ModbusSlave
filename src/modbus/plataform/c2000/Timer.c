@@ -1,10 +1,5 @@
 #include "Timer.h"
-#include "Modbus.h"
 #include "Log.h"
-
-void timer_setupInterruptions(){
-	TIMER_DEBUG();
-}
 
 void timer_resetTimer(){
 	ReloadCpuTimer0();
@@ -70,7 +65,6 @@ Timer construct_Timer(){
 	timer.timerEnabled = false;
 	timer.reloadTime = 0;
 
-	timer.setupInterruptions = timer_setupInterruptions;
 	timer.resetTimer = timer_resetTimer;
 	timer.expiredTimer = timer_expiredTimer;
 	timer.setTimerReloadPeriod = timer_setTimerReloadPeriod;

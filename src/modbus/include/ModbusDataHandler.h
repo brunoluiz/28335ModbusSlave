@@ -12,12 +12,14 @@ struct ModbusDataHandler {
 	void (*loopStates)();
 	void (*readInputRegisters)(ModbusSlave *slave);
 	void (*presetSingleRegister)(ModbusSlave *slave);
+	void (*presetMultipleRegisters)(ModbusSlave *slave);
 	void (*exception)(ModbusSlave *slave, ModbusError exceptionCode);
 };
 
-void datahandler_readInputRegisters(ModbusSlave *slave);
-void datahandler_presetSingleRegister(ModbusSlave *slave);
-void datahandler_exception(ModbusSlave *slave, ModbusError exceptionCode);
+inline void datahandler_readInputRegisters(ModbusSlave *slave);
+inline void datahandler_presetSingleRegister(ModbusSlave *slave);
+inline void datahandler_presetMultipleRegisters(ModbusSlave *slave);
+inline void datahandler_exception(ModbusSlave *slave, ModbusError exceptionCode);
 ModbusDataHandler construct_ModbusDataHandler();
 
 #endif

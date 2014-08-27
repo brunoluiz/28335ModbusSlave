@@ -6,7 +6,10 @@
 #ifndef bool
 	#define false   0
 	#define true    1
-	#define bool Uint16
+	#define bool 	Uint16
 #endif
+
+#define SERIAL_BAUDRATE 	115200
+#define DEBUG_LOG_ENABLED	false
 
 #endif

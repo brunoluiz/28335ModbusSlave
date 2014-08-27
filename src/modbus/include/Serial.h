@@ -6,11 +6,15 @@
 typedef struct Serial Serial;
 
 #ifndef SERIAL_BAUDRATE
-#define SERIAL_BAUDRATE 9600
+#define SERIAL_BAUDRATE 115200
 #endif
 
 #ifndef SERIAL_BITS_NUMBER
 #define SERIAL_BITS_NUMBER 8
+#endif
+
+#ifndef SERIAL_PARITY
+#define SERIAL_PARITY SERIAL_PARITY_NONE
 #endif
 
 // Parity constants
@@ -23,27 +27,26 @@ typedef struct Serial Serial;
 struct Serial {
 	Uint16 bitsNumber;
 	Uint16 parityType;
-	Uint16 baudrate;
-	bool fifoEnabled;
-	bool rxEnabled;
-	bool txEnabled;
+	Uint32 baudrate;
+
+	Uint16 fifoWaitBuffer;
 
 	void (*clear)();
 	Uint16 (*rxBufferStatus)();
-	void (*setSerialRxEnabled)(Serial *self, bool status);
-	void (*setSerialTxEnabled)(Serial *self, bool status);
+	void (*setSerialRxEnabled)(bool status);
+	void (*setSerialTxEnabled)(bool status);
 	void (*init)(Serial *self);
 	void (*transmitData)(Uint16 * data, Uint16 size);
 	Uint16 (*getRxBufferedWord)();
 };
 
 void serial_clear();
-Uint16 serial_rxBufferStatus();
-void serial_setSerialRxEnabled(Serial *self, bool status);
-void serial_setSerialTxEnabled(Serial *self, bool status);
+inline Uint16 serial_rxBufferStatus();
+inline void serial_setSerialRxEnabled(bool status);
+inline void serial_setSerialTxEnabled(bool status);
 void serial_init(Serial *self);
 void serial_transmitData(Uint16 * data, Uint16 size);
-Uint16 serial_getRxBufferedWord();
+inline Uint16 serial_getRxBufferedWord();
 Serial construct_Serial();
 
 #endif

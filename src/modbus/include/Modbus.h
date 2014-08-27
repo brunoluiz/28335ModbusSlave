@@ -3,28 +3,29 @@
 
 #include "PlataformSettings.h"
 
-// Settings ==========================
+// Settings ===============================================
 // Modify this settings according to your project
-#define MODBUS_SLAVE_ID				0x11			// Device ID
-#define MODBUS_BAUDRATE 			9600			// Baud rate
-#define MODBUS_PARITY				MB_PARITY_NONE	// Bits parity
-#define MODBUS_BITS_QNT				8				// Bits quantity
-#define MODBUS_FIFO_ENABLED			1				// FIFO mode
-#define MODBUS_MODE 				MB_MODE_SLAVE
-#define MODBUS_T35 					( 7UL * 220000UL ) / ( 2UL * MODBUS_BAUDRATE ) // T35char time
+#define MB_SLAVE_ID		0x01			// Device ID
+#define MB_MODE 		MB_MODE_SLAVE
+#define MB_RTU_TCP		true			// Disable ID check and CRC check (TCP converter will do that)
 
-// Log settings =======================
+// Log settings ===========================================
 // Will be used at Log.h
-#define DEBUG_LOG_ENABLED	0
+#define MB_DATA_REQUEST_DEBUG_ENABLED		true
+#define MB_DATA_RESPONSE_DEBUG_ENABLED		true
+#define MB_DATA_HANDLER_DEBUG_ENABLED		true
+#define MB_SLAVE_DEBUG_ENABLED				true
+#define SERIAL_DEBUG_ENABLED				true
+#define TIMER_DEBUG_ENABLED					true
 
-#define MB_DATA_REQUEST_DEBUG_ENABLED		0
-#define MB_DATA_RESPONSE_DEBUG_ENABLED		0
-#define MB_DATA_HANDLER_DEBUG_ENABLED		0
-#define MB_SLAVE_DEBUG_ENABLED				0
-#define SERIAL_DEBUG_ENABLED				1
-#define TIMER_DEBUG_ENABLED					1
+#ifndef DEBUG_LOG_ENABLED
+#define DEBUG_LOG_ENABLED	false
+#endif
 
 // DON'T MODIFY THE CODE BELOW!
+
+// T3.55char time
+#define MB_T35 			( 7UL * 220000UL ) / ( 2UL * SERIAL_BAUDRATE )
 
 // Modbus Mode Constants
  typedef enum {
@@ -49,6 +50,7 @@ typedef enum {
 	MB_CREATE,
 	MB_START,
 	MB_TIMER_T35_WAIT,
+	MB_PRERECEIVE,
 	MB_IDLE,
 	MB_RECEIVE,
 	MB_PROCESS,
@@ -74,7 +76,7 @@ typedef enum {
 	MB_READ_ADDRESS_LOW,
 	MB_READ_TOTALDATA_HIGH,
 	MB_READ_TOTALDATA_LOW
-} ModbusContentReadIndexes;
+} ModbusContentRequestReadIndexes;
 
 
 typedef enum {
@@ -82,13 +84,43 @@ typedef enum {
 	MB_WRITE_ADDRESS_LOW,
 	MB_WRITE_VALUE_HIGH,
 	MB_WRITE_VALUE_LOW
-} ModbusContentWriteIndexes;
+} ModbusContentRequestWriteIndexes;
 
-#define MB_SIZE_COMMON_DATA_wo_CRC	2 // Slave address (1 byte) + Function Code (1 byte)
+typedef enum {
+	MB_WRITE_N_ADDRESS_HIGH,
+	MB_WRITE_N_ADDRESS_LOW,
+	MB_WRITE_N_QUANTITY_HIGH,
+	MB_WRITE_N_QUANTITY_LOW,
+	MB_WRITE_N_BYTES,
+	MB_WRITE_N_VALUES_START_HIGH,
+	MB_WRITE_N_VALUES_START_LOW
+} ModbusContentRequestWriteNIndexes;
+
+// Size constants (with CRC) ==============================
+
 #define MB_SIZE_COMMON_DATA			4 // Slave address (1 byte) + Function Code (1 byte) + CRC (2 bytes)
-#define MB_SIZE_COMMON_RESP_READ	MB_SIZE_COMMON_DATA + 1 // MB_SIZE_COMMON_DATA + Number of requested registers (1 byte)
-#define MB_SIZE_RESP_WRITE			MB_SIZE_COMMON_DATA + 4 // MB_SIZE_COMMON_DATA + Data address (2 bytes) + Value writen (2 bytes)
-#define MB_SIZE_FUNC_READ			8
-#define MB_SIZE_EXCEPTION			5
+#define MB_SIZE_CONTENT_NORMAL		4
+// Response sizes
+#define MB_SIZE_RESP_READ_MINIMUM	MB_SIZE_COMMON_DATA + 1 // MB_SIZE_COMMON_DATA + Number of requested registers (1 byte)
+#define MB_SIZE_RESP_WRITE			MB_SIZE_COMMON_DATA + MB_SIZE_CONTENT_NORMAL // MB_SIZE_COMMON_DATA + Data address (2 bytes) + Value writen (2 bytes)
+#define MB_SIZE_RESP_WRITE_N		MB_SIZE_COMMON_DATA + MB_SIZE_CONTENT_NORMAL // MB_SIZE_COMMON_DATA + Data address (2 bytes) + Number of writen values (2 bytes)
+#define MB_SIZE_RESP_EXCEPTION		MB_SIZE_COMMON_DATA + 1
+// Request sizes
+#define MB_SIZE_REQ_WRITE_N_MINIMUM	MB_SIZE_COMMON_DATA + 5 // Data addr (2 bytes) + Number of registers (2 bytes) + Following data (1 byte)
+#define MB_SIZE_REQ_READ			MB_SIZE_COMMON_DATA + MB_SIZE_CONTENT_NORMAL
+#define MB_SIZE_REQ_WRITE			MB_SIZE_COMMON_DATA + MB_SIZE_CONTENT_NORMAL
+
+// Size constants (without CRC) ===========================
+
+#define MB_SIZE_COMMON_DATA_WITHOUTCRC			MB_SIZE_COMMON_DATA - 2
+// Response sizes
+#define MB_SIZE_RESP_READ_MINIMUM_WITHOUTCRC	MB_SIZE_RESP_READ_MINIMUM - 2
+#define MB_SIZE_RESP_WRITE_WITHOUTCRC			MB_SIZE_RESP_WRITE - 2
+#define MB_SIZE_RESP_WRITE_N_WITHOUTCRC			MB_SIZE_RESP_WRITE_N - 2
+#define MB_SIZE_RESP_EXCEPTION_WITHOUTCRC		MB_SIZE_RESP_EXCEPTION - 2
+// Request sizes
+#define MB_SIZE_REQ_WRITE_N_MINIMUM_WITHOUTCRC	MB_SIZE_REQ_WRITE_N_MINIMUM - 2
+#define MB_SIZE_REQ_READ_WITHOUTCRC				MB_SIZE_REQ_READ - 2
+#define MB_SIZE_REQ_WRITE_WITHOUTCRC			MB_SIZE_REQ_WRITE - 2
 
 #endif /* MODBUS_H_ */
