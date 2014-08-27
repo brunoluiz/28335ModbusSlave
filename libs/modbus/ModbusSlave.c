@@ -143,7 +143,7 @@ void slave_receive(ModbusSlave *self){
 			self->serial.getRxBufferedWord();
 
 	// Clears interruptions or overflow flags from serial
-	// self->serial.clear();
+	self->serial.clear();
 	// Disable serial receiving
 	self->serial.setSerialRxEnabled(false);
 

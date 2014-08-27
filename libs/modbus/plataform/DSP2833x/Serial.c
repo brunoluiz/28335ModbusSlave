@@ -5,12 +5,12 @@
 void serial_clear(){
 	SERIAL_DEBUG();
 
-	// Clear FIFO Rxoverflow flag
-//	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;
-
 	// Reset FIFO
 	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
 	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
+
+	// Clear FIFO Rxoverflow flag
+//	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;
 
 	// Clear interruptions
 //	SciaRegs.SCIFFRX.bit.RXFFINTCLR=1;
@@ -88,22 +88,18 @@ void serial_init(Serial *self){
 			SciaRegs.SCICCR.bit.PARITYENA = 0;
 	}
 
-	// TODO: Check why the baud rate settings is returning a wrong value
-	// Baud rate settings - Automatic depending on ulBaudrate
-//	#if (CPU_FRQ_150MHZ)
-//	//@LSPCLK = 37.5MHz.
-//	baudrate = (Uint32) ((Uint32) ((Uint32) 37500000 / (Uint32) (self->baudrate*8) ) - 1);
-//	#endif
-//	#if (CPU_FRQ_100MHZ)
-//	baudrate = (Uint32) ((Uint32) ((Uint32) 20000000 / (self->baudrate*8)) - 1);
-//	#endif
-//
-//	// Configure the High and Low baud rate registers
-//	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
-//	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
+	// Baud rate settings - Automatic depending on self->baudrate
+	#if (CPU_FRQ_150MHZ)
+	//@LSPCLK = 37.5MHz.
+	baudrate = (Uint32) (37500000 / (self->baudrate*8) - 1);
+	#endif
+	#if (CPU_FRQ_100MHZ)
+	baudrate = (Uint32) (20000000 / (self->baudrate*8) - 1);
+	#endif
 
-	SciaRegs.SCIHBAUD    =0x0000;  // 9600 baud @LSPCLK = 37.5MHz.
-	SciaRegs.SCILBAUD    =0x0027;
+	// Configure the High and Low baud rate registers
+	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
+	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
 
 	// Enable Interruptions
 //	SciaRegs.SCICTL2.bit.TXINTENA 	= 0;
@@ -138,7 +134,7 @@ Uint16 serial_getRxBufferedWord(){
 	SERIAL_DEBUG();
 
 	// TODO: check if it is needed
-	// while (SciaRegs.SCIRXST.bit.RXRDY) ;
+	while (SciaRegs.SCIRXST.bit.RXRDY) ;
 
 	return SciaRegs.SCIRXBUF.all;
 }

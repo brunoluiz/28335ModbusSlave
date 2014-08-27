@@ -1,3 +1,4 @@
+#include "Modbus.h"
 #include "ModbusDataHandler.h"
 #include "ModbusSlave.h"
 #include "Log.h"
