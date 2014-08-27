@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+<language name="C Source File">
+<includepath workspace_path="true">/${ProjName}/libs/modbus</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/plataform/DSP2833x</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_common/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_headers/include</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+
+</language>
+<language name="C++ Source File">
+<includepath workspace_path="true">/${ProjName}/libs/modbus</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/plataform/DSP2833x</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_common/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_headers/include</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+
+</language>
+<language name="Assembly Source File">
+<includepath workspace_path="true">/${ProjName}/libs/modbus</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/plataform/DSP2833x</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_common/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_headers/include</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+
+</language>
+<language name="Assembly Source File">
+<includepath workspace_path="true">/${ProjName}/libs/modbus</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/modbus/plataform/DSP2833x</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_common/include</includepath>
+<includepath workspace_path="true">/${ProjName}/libs/DSP2833x/DSP2833x_headers/include</includepath>
+<includepath>${CG_TOOL_ROOT}/include</includepath>
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+</section>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
+<language name="C Source File">
+
+</language>
+<language name="C++ Source File">
+
+</language>
+<language name="Assembly Source File">
+
+</language>
+<language name="Assembly Source File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+<language name="Linker Command File">
+
+</language>
+</section>
+</cdtprojectproperties>
