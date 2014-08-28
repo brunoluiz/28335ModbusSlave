@@ -94,6 +94,7 @@ void serial_init(Serial *self){
 	baudrate = (Uint32) (37500000 / (self->baudrate*8) - 1);
 	#endif
 	#if (CPU_FRQ_100MHZ)
+	//@LSPCLK = 20.0MHz.
 	baudrate = (Uint32) (20000000 / (self->baudrate*8) - 1);
 	#endif
 

@@ -10,7 +10,7 @@ bool timer_expiredTimer(Timer *self){
 	Uint32 timerCounter = ReadCpuTimer0Counter();
 	TIMER_DEBUG();
 
-	if (timerCounter == self->reloadTime)
+	if (timerCounter >= self->reloadTime)
 		return true;
 	else return false;
 }
