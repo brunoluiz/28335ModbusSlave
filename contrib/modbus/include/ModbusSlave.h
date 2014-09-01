@@ -35,15 +35,15 @@ struct ModbusSlave {
 };
 
 void slave_loopStates(ModbusSlave *self);
-void slave_create(ModbusSlave *self);
-void slave_start(ModbusSlave *self);
-void slave_timerT35Wait(ModbusSlave *self);
-void slave_preReceive(ModbusSlave *self);
-void slave_idle(ModbusSlave *self);
-void slave_receive(ModbusSlave *self);
-void slave_process(ModbusSlave *self);
-void slave_transmit(ModbusSlave *self);
-void slave_destroy(ModbusSlave *self);
+inline void slave_create(ModbusSlave *self);
+inline void slave_start(ModbusSlave *self);
+inline void slave_timerT35Wait(ModbusSlave *self);
+inline void slave_preReceive(ModbusSlave *self);
+inline void slave_idle(ModbusSlave *self);
+inline void slave_receive(ModbusSlave *self);
+inline void slave_process(ModbusSlave *self);
+inline void slave_transmit(ModbusSlave *self);
+inline void slave_destroy(ModbusSlave *self);
 ModbusSlave construct_ModbusSlave();
 
 // extern ModbusSlave modbus;

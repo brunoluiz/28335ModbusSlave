@@ -44,8 +44,8 @@ void serial_clear();
 inline Uint16 serial_rxBufferStatus();
 inline void serial_setSerialRxEnabled(bool status);
 inline void serial_setSerialTxEnabled(bool status);
-void serial_init(Serial *self);
-void serial_transmitData(Uint16 * data, Uint16 size);
+inline void serial_init(Serial *self);
+inline void serial_transmitData(Uint16 * data, Uint16 size);
 inline Uint16 serial_getRxBufferedWord();
 Serial construct_Serial();
 

@@ -20,7 +20,7 @@ struct Timer {
 inline void timer_resetTimer();
 inline bool timer_expiredTimer(Timer *self);
 inline void timer_setTimerReloadPeriod(Timer *self, Uint32 time);
-void timer_init(Timer *self, Uint32 time);
+inline void timer_init(Timer *self, Uint32 time);
 inline void timer_stop();
 inline void timer_start();
 
