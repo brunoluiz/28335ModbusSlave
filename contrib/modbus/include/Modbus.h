@@ -7,7 +7,7 @@
 // Modify this settings according to your project
 #define MB_MODE 			MB_MODE_SLAVE
 #define MB_SLAVE_ID			0x01
-#define MB_RTU_TCP			true			// Disable ID check and CRC check (TCP converter will do that)
+#define MB_RTU_TCP			false			// Disable ID check and CRC check (TCP converter will do that)
 
 // Log settings ===========================================
 // Will be used at Log.h

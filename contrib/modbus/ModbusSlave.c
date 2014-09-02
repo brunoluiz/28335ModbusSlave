@@ -171,7 +171,7 @@ void slave_process(ModbusSlave *self){
 	}
 
 	// Requested slave address must be equal of pre-defined ID
-	if (self->dataRequest.slaveAddress != MB_SLAVE_ID, 0){
+	if (self->dataRequest.slaveAddress != MB_SLAVE_ID && self->dataRequest.slaveAddress != 0){
 		MB_SLAVE_DEBUG("Request is not for this device!");
 		self->state = MB_START;
 		return ;
