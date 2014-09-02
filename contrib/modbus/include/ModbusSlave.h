@@ -27,7 +27,6 @@ struct ModbusSlave {
 	void (*start)(ModbusSlave *self);
 	void (*timerT35Wait)(ModbusSlave *self);
 	void (*idle)(ModbusSlave *self);
-	void (*preReceive)(ModbusSlave *self);
 	void (*receive)(ModbusSlave *self);
 	void (*process)(ModbusSlave *self);
 	void (*transmit)(ModbusSlave *self);
@@ -38,7 +37,6 @@ void slave_loopStates(ModbusSlave *self);
 inline void slave_create(ModbusSlave *self);
 inline void slave_start(ModbusSlave *self);
 inline void slave_timerT35Wait(ModbusSlave *self);
-inline void slave_preReceive(ModbusSlave *self);
 inline void slave_idle(ModbusSlave *self);
 inline void slave_receive(ModbusSlave *self);
 inline void slave_process(ModbusSlave *self);

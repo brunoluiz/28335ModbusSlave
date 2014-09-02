@@ -1,6 +1,5 @@
 #include "ModbusSlave.h"
 #include "ModbusData.h"
-#include "ModbusData.h"
 #include "Modbus.h"
 #include "Log.h"
 
@@ -18,10 +17,6 @@ void slave_loopStates(ModbusSlave *self){
 	case MB_TIMER_T35_WAIT:
 		MB_SLAVE_DEBUG("State: MB_TIMER_T35_WAIT");
 		self->timerT35Wait(self);
-		break;
-	case MB_PRERECEIVE:
-		MB_SLAVE_DEBUG("State: MB_PRERECEIVE\n");
-		self->preReceive(self);
 		break;
 	case MB_IDLE:
 		MB_SLAVE_DEBUG("State: MB_IDLE\n");
@@ -77,25 +72,27 @@ void slave_timerT35Wait(ModbusSlave *self){
 	if ( self->timer.expiredTimer(&self->timer) ) {
 		self->serial.setSerialRxEnabled(true);
 		self->timer.stop();
-		self->state = MB_PRERECEIVE;
+		self->state = MB_IDLE;
 	}
 }
 
-void slave_preReceive(ModbusSlave *self)
-{
+void slave_idle(ModbusSlave *self){
+	Uint16 fifoWaitBuffer = 0;
+
 	MB_SLAVE_DEBUG();
 
 	// Wait to receive Slave ID and Function Code
-	while ( self->serial.rxBufferStatus() != 2 ){ }
-
-	self->dataRequest.slaveAddress = self->serial.getRxBufferedWord();
-	self->dataRequest.functionCode = self->serial.getRxBufferedWord();
+	while ( ( self->serial.rxBufferStatus() < 2 ) &&
+		(self->serial.getRxError() == false ) ){}
 
 	// Check which function code it is to adjust the size of the RX FIFO buffer
-	// In the case of function code 0x0016, it has a variable size
+	// In the case of function code 0x0010, it has a variable size
+	self->dataRequest.slaveAddress = self->serial.getRxBufferedWord();
+	self->dataRequest.functionCode = self->serial.getRxBufferedWord();
 	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS) {
 		// Wait to receive the first address of registers and the quantity
-		while ( self->serial.rxBufferStatus() != 5 ){ }
+		while ( ( self->serial.rxBufferStatus() != fifoWaitBuffer ) &&
+				(self->serial.getRxError() == false ) ){ }
 		self->dataRequest.content[MB_WRITE_N_ADDRESS_HIGH] = self->serial.getRxBufferedWord();
 		self->dataRequest.content[MB_WRITE_N_ADDRESS_LOW] = self->serial.getRxBufferedWord();
 		self->dataRequest.content[MB_WRITE_N_QUANTITY_HIGH] = self->serial.getRxBufferedWord();
@@ -103,21 +100,21 @@ void slave_preReceive(ModbusSlave *self)
 		self->dataRequest.content[MB_WRITE_N_BYTES] = self->serial.getRxBufferedWord();
 
 		self->dataRequest.contentIdx = 5;
-		self->serial.fifoWaitBuffer = self->dataRequest.content[MB_WRITE_N_BYTES] + 2;
+		fifoWaitBuffer = self->dataRequest.content[MB_WRITE_N_BYTES] + 2;
 	}
 	else {
-		self->serial.fifoWaitBuffer = 6;
+		fifoWaitBuffer = 6;
 	}
 
-	self->state = MB_IDLE;
-}
+	while ( ( self->serial.rxBufferStatus() < fifoWaitBuffer ) &&
+			(self->serial.getRxError() == false ) ){}
 
-void slave_idle(ModbusSlave *self){
-	MB_SLAVE_DEBUG();
-
-	while ( self->serial.rxBufferStatus() != self->serial.fifoWaitBuffer ){ }
-
-	self->state = MB_RECEIVE;
+	// If there is any error on Reception, it will go to the START state
+	if (self->serial.getRxError() == true){
+		self->state = MB_START;
+	} else {
+		self->state = MB_RECEIVE;
+	}
 }
 
 void slave_receive(ModbusSlave *self){
@@ -126,7 +123,7 @@ void slave_receive(ModbusSlave *self){
 
 	MB_SLAVE_DEBUG();
 
-	if (self->dataRequest.functionCode == 0x0010) {
+	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS) {
 		while(interator < self->dataRequest.content[MB_WRITE_N_BYTES]){
 			self->dataRequest.content[self->dataRequest.contentIdx++] = self->serial.getRxBufferedWord();
 			interator++;
@@ -233,7 +230,6 @@ ModbusSlave construct_ModbusSlave(){
 	modbusSlave.create = slave_create;
 	modbusSlave.start = slave_start;
 	modbusSlave.timerT35Wait = slave_timerT35Wait;
-	modbusSlave.preReceive = slave_preReceive;
 	modbusSlave.idle = slave_idle;
 	modbusSlave.receive = slave_receive;
 	modbusSlave.process = slave_process;
