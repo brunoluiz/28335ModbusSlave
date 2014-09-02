@@ -25,19 +25,7 @@ void timer_setTimerReloadPeriod(Timer *self, Uint32 time){
 	self->stop();
 	self->reloadTime = time;
 
-	#if (CPU_FRQ_150MHZ)
-	// Configure CPU-Timer 0 to interrupt every second:
-	// 150MHz CPU Freq, 1 second Period (in uSeconds)
-	ConfigCpuTimer(&CpuTimer0, 150, ulReloadValue);
-	#endif
-
-	#if (CPU_FRQ_100MHZ)
-	// Configure CPU-Timer 0 to interrupt every second:
-	// 100MHz CPU Freq, 1 second Period (in uSeconds)
-	ConfigCpuTimer(&CpuTimer0, 100, ulReloadValue);
-	#endif
-
-	// ConfigCpuTimer(&CpuTimer0, 150, ulReloadValue);
+	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, ulReloadValue);
 }
 
 

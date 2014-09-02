@@ -1,21 +1,22 @@
 #include "ModbusSlave.h"
 #include "ModbusData.h"
-#include "Modbus.h"
+#include "ModbusDefinitions.h"
+#include "ModbusSettings.h"
 #include "Log.h"
 
 void slave_loopStates(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 	switch (self->state) {
 	case MB_CREATE:
-		MB_SLAVE_DEBUG("State: MB_CREATE");
+		MB_SLAVE_DEBUG("State: MB_CREATE\n");
 		self->create(self);
 		break;
 	case MB_START:
-		MB_SLAVE_DEBUG("State: MB_START");
+		MB_SLAVE_DEBUG("State: MB_START\n");
 		self->start(self);
 		break;
 	case MB_TIMER_T35_WAIT:
-		MB_SLAVE_DEBUG("State: MB_TIMER_T35_WAIT");
+		MB_SLAVE_DEBUG("State: MB_TIMER_T35_WAIT\n");
 		self->timerT35Wait(self);
 		break;
 	case MB_IDLE:
@@ -44,7 +45,11 @@ void slave_loopStates(ModbusSlave *self){
 void slave_create(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
+	self->serial.baudrate = SERIAL_BAUDRATE;
+	self->serial.parityType = SERIAL_PARITY_NONE;
+	self->serial.bitsNumber = SERIAL_BITS_NUMBER;
 	self->serial.init(&self->serial);
+
 	self->timer.init(&self->timer, MB_T35);
 
 	self->state = MB_START;
@@ -89,9 +94,10 @@ void slave_idle(ModbusSlave *self){
 	// In the case of function code 0x0010, it has a variable size
 	self->dataRequest.slaveAddress = self->serial.getRxBufferedWord();
 	self->dataRequest.functionCode = self->serial.getRxBufferedWord();
+
 	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS) {
 		// Wait to receive the first address of registers and the quantity
-		while ( ( self->serial.rxBufferStatus() != fifoWaitBuffer ) &&
+		while ( ( self->serial.rxBufferStatus() < 5 ) &&
 				(self->serial.getRxError() == false ) ){ }
 		self->dataRequest.content[MB_WRITE_N_ADDRESS_HIGH] = self->serial.getRxBufferedWord();
 		self->dataRequest.content[MB_WRITE_N_ADDRESS_LOW] = self->serial.getRxBufferedWord();

@@ -5,23 +5,11 @@
 
 typedef struct Serial Serial;
 
-#ifndef SERIAL_BAUDRATE
-#define SERIAL_BAUDRATE 115200
-#endif
-
-#ifndef SERIAL_BITS_NUMBER
-#define SERIAL_BITS_NUMBER 8
-#endif
-
-#ifndef SERIAL_PARITY
-#define SERIAL_PARITY SERIAL_PARITY_NONE
-#endif
-
 // Parity constants
- typedef enum {
+typedef enum {
+	SERIAL_PARITY_NONE,
 	SERIAL_PARITY_EVEN,
-	SERIAL_PARITY_ODD,
-	SERIAL_PARITY_NONE
+	SERIAL_PARITY_ODD
 } SerialParity;
 
 struct Serial {

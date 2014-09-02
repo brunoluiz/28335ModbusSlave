@@ -1,7 +1,7 @@
 #ifndef MODBUS_DATA_RESPONSE_H_
 #define MODBUS_DATA_RESPONSE_H_
 
-#include "Modbus.h"
+#include "PlataformSettings.h"
 
 typedef struct ModbusData ModbusData;
 

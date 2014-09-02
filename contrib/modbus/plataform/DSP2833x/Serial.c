@@ -9,24 +9,14 @@ void serial_clear(){
 
 	// Reset Serial in case of error
 	if(SciaRegs.SCIRXST.bit.RXERROR == true){
-		// SciaRegs.SCIRXST.bit.BRKDT
 		SciaRegs.SCICTL1.bit.SWRESET=0;
 	}
 
 	// Reset FIFO
-//	SciaRegs.SCIFFTX.bit.SCIRST=0;
 	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
 	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
-//	SciaRegs.SCIFFTX.bit.SCIRST=1;
 
 	SciaRegs.SCICTL1.bit.SWRESET=1;
-
-	// Clear FIFO Rxoverflow flag
-//	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;
-
-	// Clear interruptions
-//	SciaRegs.SCIFFRX.bit.RXFFINTCLR=1;
-//	SciaRegs.SCIFFTX.bit.TXFFINTCLR=1;
 
 }
 
@@ -101,23 +91,11 @@ void serial_init(Serial *self){
 	}
 
 	// Baud rate settings - Automatic depending on self->baudrate
-	#if (CPU_FRQ_150MHZ)
-	//@LSPCLK = 37.5MHz.
-	baudrate = (Uint32) (37500000 / (self->baudrate*8) - 1);
-	#endif
-	#if (CPU_FRQ_100MHZ)
-	//@LSPCLK = 20.0MHz.
-	baudrate = (Uint32) (20000000 / (self->baudrate*8) - 1);
-	#endif
-	// baudrate = (Uint32) (15000000 / (self->baudrate*8) - 1);
+	baudrate = (Uint32) (LSPCLK / (self->baudrate*8) - 1);
 
 	// Configure the High and Low baud rate registers
 	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
 	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
-
-	// Enable Interruptions
-//	SciaRegs.SCICTL2.bit.TXINTENA 	= 0;
-//	SciaRegs.SCICTL2.bit.RXBKINTENA = 0;
 
 	// Disable RX and TX temporarily
 	self->setSerialRxEnabled(false);
@@ -162,10 +140,6 @@ bool serial_getRxError(){
 // Construct the Serial Module
 Serial construct_Serial(){
 	Serial serial;
-
-	serial.bitsNumber	= SERIAL_BITS_NUMBER;
-	serial.parityType	= SERIAL_PARITY_NONE;
-	serial.baudrate 	= SERIAL_BAUDRATE;
 
 	serial.clear = serial_clear;
 	serial.rxBufferStatus = serial_rxBufferStatus;

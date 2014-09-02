@@ -1,8 +1,7 @@
 #ifndef MODBUS_SLAVE_H_
 #define MODBUS_SLAVE_H_
 
-#include "Modbus.h"
-#include "ModbusData.h"
+#include "ModbusDefinitions.h"
 #include "ModbusData.h"
 #include "ModbusDataHandler.h"
 #include "Serial.h"

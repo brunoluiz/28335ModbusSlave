@@ -1,5 +1,3 @@
-#include "PlataformSettings.h"
-#include "Modbus.h"
 #include "ModbusSlave.h"
 
 ModbusSlave mb;

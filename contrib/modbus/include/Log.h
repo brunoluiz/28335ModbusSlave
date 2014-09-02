@@ -1,7 +1,7 @@
 #ifndef CRC_H_
 #define CRC_H_
 
-#include "PlataformSettings.h"
+#include "ModbusSettings.h"
 
 // Log tool =============================
 // When called it displays a message at console using Variadic feature

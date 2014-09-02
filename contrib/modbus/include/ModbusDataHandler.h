@@ -1,14 +1,12 @@
 #ifndef MODBUS_IO_H_
 #define MODBUS_IO_H_
 
-#include "Modbus.h"
+#include "ModbusDefinitions.h"
 
 typedef struct ModbusDataHandler ModbusDataHandler;
 typedef struct ModbusSlave ModbusSlave;
 
 struct ModbusDataHandler {
-	Uint16 test;
-
 	void (*loopStates)();
 	void (*readInputRegisters)(ModbusSlave *slave);
 	void (*presetSingleRegister)(ModbusSlave *slave);

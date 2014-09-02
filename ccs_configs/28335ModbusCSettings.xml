@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdtprojectproperties>
 <section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
-<language name="Assembly Source File">
+<language name="C++ Source File">
 <includepath workspace_path="true">/${ProjName}/contrib/modbus</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x</includepath>
@@ -31,7 +31,7 @@
 <includepath>${CG_TOOL_ROOT}/include</includepath>
 
 </language>
-<language name="C++ Source File">
+<language name="Assembly Source File">
 <includepath workspace_path="true">/${ProjName}/contrib/modbus</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x</includepath>
@@ -52,7 +52,7 @@
 </language>
 </section>
 <section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
-<language name="Assembly Source File">
+<language name="C++ Source File">
 
 </language>
 <language name="Assembly Source File">
@@ -61,7 +61,7 @@
 <language name="C Source File">
 
 </language>
-<language name="C++ Source File">
+<language name="Assembly Source File">
 
 </language>
 <language name="Linker Command File">

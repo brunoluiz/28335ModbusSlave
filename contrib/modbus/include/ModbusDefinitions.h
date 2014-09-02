@@ -1,31 +1,7 @@
 #ifndef MODBUS_H_
 #define MODBUS_H_
 
-#include "PlataformSettings.h"
-
-// Settings ===============================================
-// Modify this settings according to your project
-#define MB_MODE 			MB_MODE_SLAVE
-#define MB_SLAVE_ID			0x01
-#define MB_RTU_TCP			false			// Disable ID check and CRC check (TCP converter will do that)
-
-// Log settings ===========================================
-// Will be used at Log.h
-#define MB_DATA_REQUEST_DEBUG_ENABLED		true
-#define MB_DATA_RESPONSE_DEBUG_ENABLED		true
-#define MB_DATA_HANDLER_DEBUG_ENABLED		true
-#define MB_SLAVE_DEBUG_ENABLED				true
-#define SERIAL_DEBUG_ENABLED				true
-#define TIMER_DEBUG_ENABLED					true
-
-#ifndef DEBUG_LOG_ENABLED
-#define DEBUG_LOG_ENABLED					false
-#endif
-
 // DON'T MODIFY THE CODE BELOW!
-
-// T3.55char time
-#define MB_T35 			( 7UL * 220000UL ) / ( 2UL * SERIAL_BAUDRATE )
 
 // Modbus Mode Constants
  typedef enum {
