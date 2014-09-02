@@ -161,7 +161,7 @@ void slave_process(ModbusSlave *self){
 #if (MB_RTU_TCP == false)
 	Uint16 receivedCrc = self->dataRequest.crc;
 	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
-	Uint16 generatedCrc = 0; generateCrc(self->dataRequest.getTransmitStringWithoutCRC(&self->dataRequest),
+	Uint16 generatedCrc = generateCrc(self->dataRequest.getTransmitStringWithoutCRC(&self->dataRequest),
 		sizeWithoutCrc);
 
 	// Check if the received CRC is equal to CRC locally generated
