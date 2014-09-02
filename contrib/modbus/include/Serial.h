@@ -29,8 +29,6 @@ struct Serial {
 	Uint16 parityType;
 	Uint32 baudrate;
 
-	Uint16 fifoWaitBuffer;
-
 	void (*clear)();
 	Uint16 (*rxBufferStatus)();
 	void (*setSerialRxEnabled)(bool status);
@@ -38,6 +36,7 @@ struct Serial {
 	void (*init)(Serial *self);
 	void (*transmitData)(Uint16 * data, Uint16 size);
 	Uint16 (*getRxBufferedWord)();
+	bool (*getRxError)();
 };
 
 void serial_clear();
@@ -47,6 +46,7 @@ inline void serial_setSerialTxEnabled(bool status);
 inline void serial_init(Serial *self);
 inline void serial_transmitData(Uint16 * data, Uint16 size);
 inline Uint16 serial_getRxBufferedWord();
+inline bool serial_getRxError();
 Serial construct_Serial();
 
 #endif

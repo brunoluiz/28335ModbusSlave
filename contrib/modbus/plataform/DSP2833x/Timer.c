@@ -1,3 +1,5 @@
+#include "PlataformSettings.h"
+#include "DSP2833x_CpuTimers.h"
 #include "Timer.h"
 #include "Log.h"
 
@@ -34,6 +36,8 @@ void timer_setTimerReloadPeriod(Timer *self, Uint32 time){
 	// 100MHz CPU Freq, 1 second Period (in uSeconds)
 	ConfigCpuTimer(&CpuTimer0, 100, ulReloadValue);
 	#endif
+
+	// ConfigCpuTimer(&CpuTimer0, 150, ulReloadValue);
 }
 
 

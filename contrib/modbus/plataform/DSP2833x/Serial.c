@@ -1,3 +1,5 @@
+#include "PlataformSettings.h"
+#include "DSP2833x_Sci.h"
 #include "Serial.h"
 #include "Log.h"
 
@@ -5,9 +7,19 @@
 void serial_clear(){
 	SERIAL_DEBUG();
 
+	// Reset Serial in case of error
+	if(SciaRegs.SCIRXST.bit.RXERROR == true){
+		// SciaRegs.SCIRXST.bit.BRKDT
+		SciaRegs.SCICTL1.bit.SWRESET=0;
+	}
+
 	// Reset FIFO
+//	SciaRegs.SCIFFTX.bit.SCIRST=0;
 	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
 	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
+//	SciaRegs.SCIFFTX.bit.SCIRST=1;
+
+	SciaRegs.SCICTL1.bit.SWRESET=1;
 
 	// Clear FIFO Rxoverflow flag
 //	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;
@@ -97,6 +109,7 @@ void serial_init(Serial *self){
 	//@LSPCLK = 20.0MHz.
 	baudrate = (Uint32) (20000000 / (self->baudrate*8) - 1);
 	#endif
+	// baudrate = (Uint32) (15000000 / (self->baudrate*8) - 1);
 
 	// Configure the High and Low baud rate registers
 	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
@@ -140,15 +153,19 @@ Uint16 serial_getRxBufferedWord(){
 	return SciaRegs.SCIRXBUF.all;
 }
 
+bool serial_getRxError(){
+	SERIAL_DEBUG();
+
+	return SciaRegs.SCIRXST.bit.RXERROR;
+}
+
 // Construct the Serial Module
 Serial construct_Serial(){
 	Serial serial;
 
 	serial.bitsNumber	= SERIAL_BITS_NUMBER;
-	serial.parityType	= SERIAL_PARITY;
+	serial.parityType	= SERIAL_PARITY_NONE;
 	serial.baudrate 	= SERIAL_BAUDRATE;
-
-	serial.fifoWaitBuffer = 0;
 
 	serial.clear = serial_clear;
 	serial.rxBufferStatus = serial_rxBufferStatus;
@@ -157,6 +174,7 @@ Serial construct_Serial(){
 	serial.init = serial_init;
 	serial.transmitData = serial_transmitData;
 	serial.getRxBufferedWord = serial_getRxBufferedWord;
+	serial.getRxError = serial_getRxError;
 
 	SERIAL_DEBUG();
 

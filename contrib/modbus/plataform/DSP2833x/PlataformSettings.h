@@ -1,7 +1,8 @@
 #ifndef PLATAFORM_SETTINGS_H_
 #define PLATAFORM_SETTINGS_
 
-#include "DSP28x_Project.h"
+#include "DSP2833x_Device.h"     // DSP2833x Headerfile Include File
+#include "DSP2833x_Examples.h"   // DSP2833x Examples Include File
 
 #ifndef bool
 	#define false   0
@@ -9,7 +10,7 @@
 	#define bool 	Uint16
 #endif
 
-#define SERIAL_BAUDRATE 	115200
+#define SERIAL_BAUDRATE 	38400
 #define DEBUG_LOG_ENABLED	false
 
 #ifndef DSP28_DATA_TYPES
