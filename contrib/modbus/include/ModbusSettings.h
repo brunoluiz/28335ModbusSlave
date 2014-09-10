@@ -14,8 +14,12 @@
 #define SERIAL_PARITY 		SERIAL_PARITY_NONE
 #define SERIAL_BITS_NUMBER 	8
 
-// Timer settings =========================================
-#define MB_T35 			( 7UL * 220000UL ) / ( 2UL * SERIAL_BAUDRATE )
+#define SERIAL_START_STOP_NUMBER_BITS		2
+#if SERIAL_PARITY != SERIAL_PARITY_NONE
+	#define SERIAL_PARITY_NUMBER_BITS	1
+#else
+	#define SERIAL_PARITY_NUMBER_BITS	0
+#endif
 
 
 // Log settings ===========================================
