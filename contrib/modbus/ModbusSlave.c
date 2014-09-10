@@ -43,6 +43,14 @@ void slave_loopStates(ModbusSlave *self){
 }
 
 void slave_create(ModbusSlave *self){
+#if SERIAL_BAUDRATE <= 38400
+	Uint16 serialFrameSize = SERIAL_START_STOP_NUMBER_BITS
+			+ SERIAL_BITS_NUMBER
+			+ SERIAL_PARITY_NUMBER_BITS;
+	Uint64 mbT35 = (serialFrameSize * 3500000) / SERIAL_BAUDRATE;
+#else
+	Uint64 mbT35 = 1750;
+#endif
 	MB_SLAVE_DEBUG();
 
 	self->serial.baudrate = SERIAL_BAUDRATE;
@@ -50,7 +58,7 @@ void slave_create(ModbusSlave *self){
 	self->serial.bitsNumber = SERIAL_BITS_NUMBER;
 	self->serial.init(&self->serial);
 
-	self->timer.init(&self->timer, MB_T35);
+	self->timer.init(&self->timer, mbT35);
 
 	self->state = MB_START;
 }

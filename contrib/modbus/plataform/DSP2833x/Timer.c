@@ -9,23 +9,24 @@ void timer_resetTimer(){
 }
 
 bool timer_expiredTimer(Timer *self){
-	Uint32 timerCounter = ReadCpuTimer0Counter();
+	Uint32 timerZeroed = CpuTimer0Regs.TCR.bit.TIF;
 	TIMER_DEBUG();
 
-	if (timerCounter >= self->reloadTime)
+	if (timerZeroed == true) {
 		return true;
-	else return false;
+	}
+	else {
+		return false;
+	}
 }
 
 void timer_setTimerReloadPeriod(Timer *self, Uint32 time){
-	Uint64 ulReloadValue = ( time * 1000000UL) / 20000UL;
-
 	TIMER_DEBUG();
 
 	self->stop();
 	self->reloadTime = time;
 
-	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, ulReloadValue);
+	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, time);
 }
 
 

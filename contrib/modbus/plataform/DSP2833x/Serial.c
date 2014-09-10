@@ -115,9 +115,10 @@ void serial_transmitData(Uint16 * data, Uint16 size){
 	SERIAL_DEBUG();
 
 	for (i = 0; i < size; i++){
-		// while (!SciaRegs.SCICTL2.bit.TXRDY) ; // TODO: check if it is needed
 		SciaRegs.SCITXBUF= data[i];
 	}
+
+	while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
 }
 
 // Get Read data from buffer
