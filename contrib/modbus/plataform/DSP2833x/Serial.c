@@ -97,15 +97,14 @@ void serial_init(Serial *self){
 	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
 	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
 
-	// Disable RX and TX temporarily
-	self->setSerialRxEnabled(false);
-	self->setSerialTxEnabled(false);
-
 	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
 	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
 
 	// Reset the serial
-	SciaRegs.SCICTL1.bit.SWRESET 	= 1;
+	// SciaRegs.SCICTL1.bit.RXENA		= 0;
+	// SciaRegs.SCICTL1.bit.TXENA		= 0;
+	// SciaRegs.SCICTL1.bit.SWRESET 	= 1;
+	SciaRegs.SCICTL1.all = 0x23;
 
 	SERIAL_DEBUG();
 }

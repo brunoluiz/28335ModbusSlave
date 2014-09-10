@@ -7,14 +7,14 @@
 // The below values are the most common
 
 // For CPU Frequency = 150 Mhz
-//#define CPU_FREQ	150
-//#define LSPCLK 	37500000
+#define CPU_FREQ	150
+#define LSPCLK 	37500000
 // For CPU Frequency = 100 Mhz
 //#define CPU_FREQ	100
 //#define LSPCLK 		20000000
 
-#define CPU_FREQ	150
-#define LSPCLK 		37500000
+//#define CPU_FREQ	150
+//#define LSPCLK 		15000000
 
 // Data types definitions =================================
 

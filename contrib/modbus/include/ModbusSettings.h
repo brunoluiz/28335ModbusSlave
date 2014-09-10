@@ -5,13 +5,12 @@
 #include "Serial.h"
 
 // Modbus settings ========================================
-#define MB_MODE 			MB_MODE_SLAVE
 #define MB_SLAVE_ID			0x01
 #define MB_RTU_TCP			false			// Disable ID check and CRC check (TCP converter will do that)
 
 // Serial settings ========================================
 
-#define SERIAL_BAUDRATE 	115200
+#define SERIAL_BAUDRATE 	38400
 #define SERIAL_PARITY 		SERIAL_PARITY_NONE
 #define SERIAL_BITS_NUMBER 	8
 
