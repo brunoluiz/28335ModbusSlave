@@ -4,7 +4,7 @@
 #include "Log.h"
 
 void timer_resetTimer(){
-	ReloadCpuTimer0();
+	CpuTimer0Regs.TCR.bit.TRB = 1;
 	TIMER_DEBUG();
 }
 
@@ -24,15 +24,26 @@ void timer_setTimerReloadPeriod(Timer *self, Uint32 time){
 	TIMER_DEBUG();
 
 	self->stop();
-	self->reloadTime = time;
 
 	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, time);
 }
 
 
 void timer_init(Timer *self, Uint32 time){
-	// Initialize the Device Peripheral. This function can be found in DSP2833x_CpuTimers.c
-	InitCpuTimers();
+    // CPU Timer 0
+    // Initialize address pointers to respective timer registers:
+    CpuTimer0.RegsAddr = &CpuTimer0Regs;
+    // Initialize timer period to maximum:
+    CpuTimer0Regs.PRD.all  = 0xFFFFFFFF;
+    // Initialize pre-scale counter to divide by 1 (SYSCLKOUT):
+    CpuTimer0Regs.TPR.all  = 0;
+    CpuTimer0Regs.TPRH.all = 0;
+    // Make sure timer is stopped:
+    CpuTimer0Regs.TCR.bit.TSS = 1;
+    // Reload all counter register with period value:
+    CpuTimer0Regs.TCR.bit.TRB = 1;
+    // Reset interrupt counters:
+    CpuTimer0.InterruptCount = 0;
 
 	// Config the timer reload period
 	self->setTimerReloadPeriod(self, time);
@@ -43,12 +54,12 @@ void timer_init(Timer *self, Uint32 time){
 }
 
 void timer_stop(){
-	StopCpuTimer0();
+	CpuTimer0Regs.TCR.bit.TSS = 1;
 	TIMER_DEBUG();
 }
 
 void timer_start(){
-	StartCpuTimer0();
+	CpuTimer0Regs.TCR.bit.TSS = 0;
 	TIMER_DEBUG();
 }
 

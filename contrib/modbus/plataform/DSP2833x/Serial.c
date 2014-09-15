@@ -42,7 +42,28 @@ void serial_setSerialTxEnabled(bool status){
 void serial_init(Serial *self){
 	Uint32 baudrate;
 
-	InitSciaGpio();
+	EALLOW;
+
+	/* Enable internal pull-up for the selected pins */
+	// Pull-ups can be enabled or disabled disabled by the user.
+	// This will enable the pullups for the specified pins.
+
+	GpioCtrlRegs.GPAPUD.bit.GPIO28 = 0;    // Enable pull-up for GPIO28 (SCIRXDA)
+	GpioCtrlRegs.GPAPUD.bit.GPIO29 = 0;	   // Enable pull-up for GPIO29 (SCITXDA)
+
+	/* Set qualification for selected pins to asynch only */
+	// Inputs are synchronized to SYSCLKOUT by default.
+	// This will select asynch (no qualification) for the selected pins.
+
+	GpioCtrlRegs.GPAQSEL2.bit.GPIO28 = 3;  // Asynch input GPIO28 (SCIRXDA)
+
+	/* Configure SCI-A pins using GPIO regs*/
+	// This specifies which of the possible GPIO pins will be SCI functional pins.
+
+	GpioCtrlRegs.GPAMUX2.bit.GPIO28 = 1;   // Configure GPIO28 for SCIRXDA operation
+	GpioCtrlRegs.GPAMUX2.bit.GPIO29 = 1;   // Configure GPIO29 for SCITXDA operation
+
+	EDIS;
 
 	// FIFO TX configurations
 	// 0:4 	Interruption level: 0
