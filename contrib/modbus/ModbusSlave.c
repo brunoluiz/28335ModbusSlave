@@ -72,8 +72,6 @@ void slave_start(ModbusSlave *self){
 	self->dataResponse.clear(&self->dataResponse);
 
 	self->serial.clear();
-	self->serial.setSerialRxEnabled(false);
-	self->serial.setSerialTxEnabled(false);
 
 	self->timer.start();
 	self->state = MB_TIMER_T35_WAIT;
@@ -83,7 +81,6 @@ void slave_timerT35Wait(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
 	if ( self->timer.expiredTimer(&self->timer) ) {
-		self->serial.setSerialRxEnabled(true);
 		self->timer.stop();
 		self->state = MB_IDLE;
 	}
@@ -155,8 +152,6 @@ void slave_receive(ModbusSlave *self){
 
 	// Clears interruptions or overflow flags from serial
 	self->serial.clear();
-	// Disable serial receiving
-	self->serial.setSerialRxEnabled(false);
 
 	if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS){
 		self->dataRequest.size = MB_SIZE_REQ_READ;
@@ -215,8 +210,7 @@ void slave_process(ModbusSlave *self){
 
 void slave_transmit(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
-	
-	self->serial.setSerialTxEnabled(true);
+
 	self->serial.transmitData(self->dataResponse.getTransmitString(&self->dataResponse),
 			self->dataResponse.size);
 

@@ -122,8 +122,8 @@ void serial_init(Serial *self){
 	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
 
 	// Reset the serial
-	// SciaRegs.SCICTL1.bit.RXENA		= 0;
-	// SciaRegs.SCICTL1.bit.TXENA		= 0;
+	 SciaRegs.SCICTL1.bit.RXENA		= 1;
+	 SciaRegs.SCICTL1.bit.TXENA		= 1;
 	// SciaRegs.SCICTL1.bit.SWRESET 	= 1;
 	SciaRegs.SCICTL1.all = 0x23;
 
@@ -139,7 +139,7 @@ void serial_transmitData(Uint16 * data, Uint16 size){
 		SciaRegs.SCITXBUF= data[i];
 	}
 
-	while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
+//	while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
 }
 
 // Get Read data from buffer

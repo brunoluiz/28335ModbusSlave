@@ -13,7 +13,7 @@ void datahandler_readInputRegisters(ModbusSlave *slave){
 	Uint16 sizeWithoutCRC;
 	Uint16 * transmitString;
 	Uint16 addressIterator;
-	static Uint16 counter = 0;
+	static Uint16 counter = 0x00;
 
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
 	slave->dataResponse.functionCode = MB_FUNC_READ_HOLDINGREGISTERS;
@@ -31,7 +31,9 @@ void datahandler_readInputRegisters(ModbusSlave *slave){
 //		slave->dataResponse.content[slave->dataResponse.contentIdx++] = addr_val & 0x00FF;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (counter & 0xFF00) >> 8;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = counter & 0x00FF;
-		counter++;
+
+		if (counter == 0xFF) counter = 0;
+		else counter++;
 	}
 
 	slave->dataResponse.size = MB_SIZE_RESP_READ_MINIMUM + totalDataRequested * 2;
