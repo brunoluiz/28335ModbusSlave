@@ -2,7 +2,8 @@
 #include "ModbusData.h"
 #include "Log.h"
 
-void response_clear(ModbusData *self){
+// Clears all data of Modbus Data
+void data_clear(ModbusData *self){
 	MB_DATA_RESPONSE_DEBUG();
 	self->slaveAddress = 0;
 	self->functionCode = 0;
@@ -11,7 +12,9 @@ void response_clear(ModbusData *self){
 	self->crc = 0;
 }
 
- Uint16 * response_getTransmitString(ModbusData *self){
+// Return a string with the data that will be transmited
+// Mostly used for the last step of process: MB_TRANSMIT (serial TX)
+ Uint16 * data_getTransmitString(ModbusData *self){
 	static Uint16 string[16] = {0};
 	Uint16 stringIndex = 0;
 	Uint16 contentIterator;
@@ -19,6 +22,7 @@ void response_clear(ModbusData *self){
 	string[stringIndex++] = self->slaveAddress;
 	string[stringIndex++] = self->functionCode;
 	
+	// Loop throught the "general content" part of data frame
 	for(contentIterator = 0; contentIterator < (self->size - MB_SIZE_COMMON_DATA); contentIterator++){
 		string[stringIndex++] = (self->content[contentIterator]) & 0x00FF;
 	}
@@ -30,8 +34,9 @@ void response_clear(ModbusData *self){
 	return string;
 }
 
-
- Uint16 * response_getTransmitStringWithoutCRC(ModbusData *self){
+// Return a string with the data that will be transmited (but without CRC)
+// Mostly used to create the CRC (get this string and the size of it and then generate the CRC)
+ Uint16 * data_getTransmitStringWithoutCRC(ModbusData *self){
 	static Uint16 string[16] = {0};
 	Uint16 stringIndex = 0;
 	Uint16 contentIterator;
@@ -39,6 +44,7 @@ void response_clear(ModbusData *self){
 	string[stringIndex++] = self->slaveAddress;
 	string[stringIndex++] = self->functionCode;
 
+	// Loop throught the "general content" part of data frame
 	for(contentIterator = 0; contentIterator < (self->size - MB_SIZE_COMMON_DATA); contentIterator++){
 		string[stringIndex++] = (self->content[contentIterator]);
 	}
@@ -56,9 +62,9 @@ ModbusData construct_ModbusData(){
 	modbusData.crc = 0;
 	modbusData.size = 0;
 
-	modbusData.clear = response_clear;
-	modbusData.getTransmitString = response_getTransmitString;
-	modbusData.getTransmitStringWithoutCRC = response_getTransmitStringWithoutCRC;
+	modbusData.clear = data_clear;
+	modbusData.getTransmitString = data_getTransmitString;
+	modbusData.getTransmitStringWithoutCRC = data_getTransmitStringWithoutCRC;
 
 	MB_DATA_RESPONSE_DEBUG();
 

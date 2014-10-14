@@ -54,6 +54,12 @@
 	#define MB_SLAVE_DEBUG(nonVariadicVar)
 #endif
 
+#if MB_VAR_MAP_DEBUG && DEBUG_LOG_ENABLED
+	#define MB_VAR_MAP_DEBUG(fmt, ...) SMART_DEBUG(fmt, __VA_ARGS__)
+#else
+	#define MB_VAR_MAP_DEBUG(nonVariadicVar)
+#endif
+
 #if TIMER_DEBUG_ENABLED && DEBUG_LOG_ENABLED
 	#define TIMER_DEBUG(fmt, ...) SMART_DEBUG(fmt, __VA_ARGS__)
 #else

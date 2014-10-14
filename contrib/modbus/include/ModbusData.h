@@ -18,9 +18,9 @@ struct ModbusData {
 	Uint16 * (*getTransmitStringWithoutCRC)(ModbusData *self);
 };
 
-inline void response_clear(ModbusData *self);
-inline Uint16 * response_getTransmitString(ModbusData *self);
-inline Uint16 * response_getTransmitStringWithoutCRC(ModbusData *self);
+inline void data_clear(ModbusData *self);
+inline Uint16 * data_getTransmitString(ModbusData *self);
+inline Uint16 * data_getTransmitStringWithoutCRC(ModbusData *self);
 ModbusData construct_ModbusData();
 
 #endif

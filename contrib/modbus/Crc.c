@@ -1,6 +1,6 @@
 #include "Crc.h"
 
-Uint16 generateCrc(Uint16 * buf, int len)
+Uint16 generateCrc(Uint16 * buf, int len, bool swap)
 {
   Uint16 crc = 0xFFFF;
   Uint16 temp = 0;
@@ -25,9 +25,11 @@ Uint16 generateCrc(Uint16 * buf, int len)
   }
 
   // Swype bytes
-  temp = crc;
-  crc = (crc & 0xFF00) >> 8;
-  crc = ( (temp & 0x00FF) << 8 ) | crc;
+  if(swap == true) {
+	temp = crc;
+	crc = (crc & 0xFF00) >> 8;
+	crc = ( (temp & 0x00FF) << 8 ) | crc;
+  }
 
   return crc;
 }

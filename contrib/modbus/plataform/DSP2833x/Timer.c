@@ -24,13 +24,15 @@ void timer_setTimerReloadPeriod(Timer *self, Uint32 time){
 	TIMER_DEBUG();
 
 	self->stop();
+	self->reloadTime = time;
 
 	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, time);
 }
 
 
 void timer_init(Timer *self, Uint32 time){
-    // CPU Timer 0
+	// START: GOT FROM TEXAS FILES //////////////////////////////////////
+	// CPU Timer 0
     // Initialize address pointers to respective timer registers:
     CpuTimer0.RegsAddr = &CpuTimer0Regs;
     // Initialize timer period to maximum:
@@ -44,9 +46,11 @@ void timer_init(Timer *self, Uint32 time){
     CpuTimer0Regs.TCR.bit.TRB = 1;
     // Reset interrupt counters:
     CpuTimer0.InterruptCount = 0;
+    // END: GOT FROM TEXAS FILES ////////////////////////////////////////
 
 	// Config the timer reload period
-	self->setTimerReloadPeriod(self, time);
+	self->reloadTime = time;
+	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, time);
 
 	// If needed, you can set interruptions and other things here
 

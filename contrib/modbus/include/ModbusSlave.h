@@ -4,6 +4,7 @@
 #include "ModbusDefinitions.h"
 #include "ModbusData.h"
 #include "ModbusDataHandler.h"
+#include "ModbusDataMap.h"
 #include "Serial.h"
 #include "Timer.h"
 #include "Crc.h"
@@ -15,6 +16,9 @@ struct ModbusSlave {
 
 	ModbusData dataRequest;
 	ModbusData dataResponse;
+
+	ModbusCoilsMap coils;
+	ModbusHoldingRegistersMap registers;
 
 	Serial serial;
 	Timer timer;
@@ -30,6 +34,8 @@ struct ModbusSlave {
 	void (*process)(ModbusSlave *self);
 	void (*transmit)(ModbusSlave *self);
 	void (*destroy)(ModbusSlave *self);
+
+	Uint16 readInputCounter;
 };
 
 void slave_loopStates(ModbusSlave *self);

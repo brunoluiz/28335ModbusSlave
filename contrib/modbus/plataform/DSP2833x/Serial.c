@@ -9,7 +9,13 @@ void serial_clear(){
 
 	// Reset Serial in case of error
 	if(SciaRegs.SCIRXST.bit.RXERROR == true){
+		Uint16 i, destroyFIFO;
 		SciaRegs.SCICTL1.bit.SWRESET=0;
+
+		// TODO: Check if is necessary
+		// Clears FIFO buffer
+		for (i = SciaRegs.SCIFFRX.bit.RXFFST; i > 0; i--)
+			destroyFIFO = SciaRegs.SCIRXBUF.all;
 	}
 
 	// Reset FIFO
@@ -20,7 +26,7 @@ void serial_clear(){
 
 }
 
-// TODO: check if this works
+// Get how much data is at the RX FIFO Buffer
 Uint16 serial_rxBufferStatus(){
 	return SciaRegs.SCIFFRX.bit.RXFFST;
 }
@@ -42,28 +48,27 @@ void serial_setSerialTxEnabled(bool status){
 void serial_init(Serial *self){
 	Uint32 baudrate;
 
+	// START: GOT FROM InitScia() FUNCTION (TEXAS FILES) ////////////////////////////////////////
 	EALLOW;
 
 	/* Enable internal pull-up for the selected pins */
 	// Pull-ups can be enabled or disabled disabled by the user.
 	// This will enable the pullups for the specified pins.
-
 	GpioCtrlRegs.GPAPUD.bit.GPIO28 = 0;    // Enable pull-up for GPIO28 (SCIRXDA)
 	GpioCtrlRegs.GPAPUD.bit.GPIO29 = 0;	   // Enable pull-up for GPIO29 (SCITXDA)
 
 	/* Set qualification for selected pins to asynch only */
 	// Inputs are synchronized to SYSCLKOUT by default.
 	// This will select asynch (no qualification) for the selected pins.
-
 	GpioCtrlRegs.GPAQSEL2.bit.GPIO28 = 3;  // Asynch input GPIO28 (SCIRXDA)
 
 	/* Configure SCI-A pins using GPIO regs*/
 	// This specifies which of the possible GPIO pins will be SCI functional pins.
-
 	GpioCtrlRegs.GPAMUX2.bit.GPIO28 = 1;   // Configure GPIO28 for SCIRXDA operation
 	GpioCtrlRegs.GPAMUX2.bit.GPIO29 = 1;   // Configure GPIO29 for SCITXDA operation
 
 	EDIS;
+	// END: GOT FROM InitScia() FUNCTION (TEXAS FILES) ////////////////////////////////////////
 
 	// FIFO TX configurations
 	// 0:4 	Interruption level: 0
@@ -139,10 +144,11 @@ void serial_transmitData(Uint16 * data, Uint16 size){
 		SciaRegs.SCITXBUF= data[i];
 	}
 
-//	while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
+	// If you want to wait until the TX buffer is empty, uncomment line below
+	//while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
 }
 
-// Get Read data from buffer
+// Read data from buffer (byte per byte)
 Uint16 serial_getRxBufferedWord(){
 	SERIAL_DEBUG();
 
