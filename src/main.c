@@ -9,6 +9,8 @@ int main(){
 
 	mb.coils.dummy1 = 1;
 	mb.coils.dummy5 = 1;
+	mb.coils.dummy10 = 1;
+	mb.coils.dummy15 = 1;
 
 	mb.registers.dummy1 = 20.2;
 	mb.registers.dummy3 = 20.2;

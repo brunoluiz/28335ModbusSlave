@@ -21,6 +21,15 @@ struct ModbusCoilsMap{
 	bool dummy5:1;
 	bool dummy6:1;
 	bool dummy7:1;
+	bool dummy8:1;
+	bool dummy9:1;
+	bool dummy10:1;
+	bool dummy11:1;
+	bool dummy12:1;
+	bool dummy13:1;
+	bool dummy14:1;
+	bool dummy15:1;
+	bool dummy16:1;
 };
 
 struct ModbusHoldingRegistersMap {

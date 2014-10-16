@@ -49,7 +49,7 @@ void slave_create(ModbusSlave *self){
 
 	// Configure the 3.5c time for timer
 	// For baudrates higher than 38400 is recommended a fixed value
-#if SERIAL_BAUDRATE <= 38400
+#if SERIAL_BAUDRATE <= 19200
 	Uint16 serialFrameSize = SERIAL_START_STOP_NUMBER_BITS
 			+ SERIAL_BITS_NUMBER
 			+ SERIAL_PARITY_NUMBER_BITS;
@@ -120,7 +120,8 @@ void slave_idle(ModbusSlave *self){
 
 	// If the function code is for writing on multiple registers, then the FIFO Wait Buffer will not be fixed
 	// Else it uses a fixed value (6 bytes)
-	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS) {
+	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS ||
+			self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS) {
 		// Wait to receive the first address of registers and the quantity
 		while ( ( self->serial.rxBufferStatus() < 5 ) &&
 				(self->serial.getRxError() == false ) ){ }
@@ -158,7 +159,8 @@ void slave_receive(ModbusSlave *self){
 
 	MB_SLAVE_DEBUG();
 
-	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS) {
+	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS ||
+			self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS ) {
 		while(interator < self->dataRequest.content[MB_WRITE_N_BYTES]){
 			self->dataRequest.content[self->dataRequest.contentIdx++] = self->serial.getRxBufferedWord();
 			interator++;
@@ -182,10 +184,12 @@ void slave_receive(ModbusSlave *self){
 	// By default it will use the READ size, because it is always the same (independent of function code)
 	self->dataRequest.size = MB_SIZE_REQ_READ;
 
-	if(self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS) {
+	if(self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS ||
+			self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS) {
 		self->dataRequest.size = MB_SIZE_REQ_WRITE_N_MINIMUM + self->dataRequest.content[MB_WRITE_N_BYTES];
 	}
-	else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER){
+	else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER ||
+			self->dataRequest.functionCode == MB_FUNC_FORCE_COIL){
 		self->dataRequest.size = MB_SIZE_REQ_WRITE;
 	}
 
@@ -231,12 +235,20 @@ void slave_process(ModbusSlave *self){
 			self->dataHandler.readHoldingRegisters(self);
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER){
-			MB_SLAVE_DEBUG("Presetting holding registers");
+			MB_SLAVE_DEBUG("Presetting holding register");
 			self->dataHandler.presetSingleRegister(self);
 		}
+		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_COIL){
+			MB_SLAVE_DEBUG("Forcing coil");
+			self->dataHandler.forceSingleCoil(self);
+		}
 		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS){
-			MB_SLAVE_DEBUG("Presetting holding registers");
+			MB_SLAVE_DEBUG("Presetting multiple holding registers");
 			self->dataHandler.presetMultipleRegisters(self);
+		}
+		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS){
+			MB_SLAVE_DEBUG("Forcing multiple coils");
+			self->dataHandler.forceMultipleCoils(self);
 		}
 		else {
 			MB_SLAVE_DEBUG("Exception: ILLEGALFUNC");

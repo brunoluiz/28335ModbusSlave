@@ -14,7 +14,7 @@ void serial_clear(){
 
 		// TODO: Check if is necessary
 		// Clears FIFO buffer
-		for (i = SciaRegs.SCIFFRX.bit.RXFFST; i > 0; i--)
+		for (i = SciaRegs.SCIFFRX.bit.RXFFST; i >= 0; i--)
 			destroyFIFO = SciaRegs.SCIRXBUF.all;
 	}
 
