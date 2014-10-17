@@ -225,15 +225,18 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 
 
 void datahandler_forceMultipleCoils(ModbusSlave *slave){
-	Uint16 * memAddr;
 	Uint16 idx;
 	Uint16 * transmitString;
-	Uint16 dataAddress = (slave->dataRequest.content[MB_WRITE_N_ADDRESS_HIGH] << 8) |
+	Uint16 coilAddress = (slave->dataRequest.content[MB_WRITE_N_ADDRESS_HIGH] << 8) |
 				slave->dataRequest.content[MB_WRITE_N_ADDRESS_LOW];
 	Uint16 totalBytes = slave->dataRequest.content[MB_WRITE_N_BYTES];
 	Uint16 totalCoils = (slave->dataRequest.content[MB_WRITE_N_QUANTITY_HIGH] << 8) |
 			slave->dataRequest.content[MB_WRITE_N_QUANTITY_LOW];
-	bool reg16ReturnIdx = false;
+	Uint16 addrPadding;
+	Uint16 totalPadding;
+	Uint16 ptrPadding;
+	char tempContent;
+	char maskLeftShift , maskRightShift;
 
 	// Reference to MODBUS Data Map
 	char * coilsPtr;
@@ -248,39 +251,23 @@ void datahandler_forceMultipleCoils(ModbusSlave *slave){
 	slave->dataResponse.content[slave->dataResponse.contentIdx++] = slave->dataRequest.content[MB_WRITE_N_QUANTITY_LOW];
 
 	// Writes values at specified address values
+	// Not fully implemented: only work with 8 coils
+
+	addrPadding = coilAddress % 16;
 	for (idx = 0; idx < totalBytes; idx++) {
-		Uint16 coilsNum = totalCoils - idx*8;
-		Uint16 ptrPadding = idx + floor(dataAddress/8) - reg16ReturnIdx;
-//		Uint16 padding = dataAddress - floor(dataAddress/8) * 8;
-		Uint16 tempContent = 0;
-		Uint16 valuesToWrite = 0;
-		Uint16 mask;
+		Uint16 coilValue = slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx];
+		Uint16 idxPadding = idx % 2 ;
+		ptrPadding = coilAddress/16 + idxPadding;
+		totalPadding = addrPadding + idxPadding*8 + totalCoils%8;
 
-		memAddr = (Uint16 *) (coilsPtr + ptrPadding);
-		mask = 0x00FF << ( (~reg16ReturnIdx & 1) * 8 );
+		tempContent = *( coilsPtr );
 
-		if (coilsNum < 8){
-			Uint16 shadowMask;
-			if (reg16ReturnIdx == 0){
-				shadowMask = 0xFF00;
-				shadowMask = mask >> (8 - coilsNum);
-				mask = shadowMask | mask;
-			}
-			else {
-				shadowMask = 0xFFFF >> (8 - coilsNum);
-				shadowMask = ~shadowMask;
-				mask = mask | shadowMask;
-			}
-		}
-
-		tempContent = *(coilsPtr + ptrPadding) & mask;
-		valuesToWrite = slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx];
-		valuesToWrite = valuesToWrite << (reg16ReturnIdx*8);
-
-		*(memAddr) = tempContent | valuesToWrite;
-
-		if(reg16ReturnIdx == 0) reg16ReturnIdx = 1;
-		else reg16ReturnIdx = 0;
+		coilValue = coilValue << (addrPadding + idxPadding*8);
+		maskLeftShift = (0xFFFF << totalPadding ) | ~(0xFFFF << addrPadding );
+		maskRightShift = ~(0xFFFF >> ( 16 - totalPadding));
+		tempContent = (tempContent & maskLeftShift ) |
+				(tempContent & maskRightShift);
+		*(coilsPtr + ptrPadding) = tempContent | coilValue;
 	}
 
 	// Data response size

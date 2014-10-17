@@ -14,6 +14,7 @@ typedef struct ModbusCoilsMap ModbusCoilsMap;
 typedef struct ModbusHoldingRegistersMap ModbusHoldingRegistersMap;
 
 struct ModbusCoilsMap{
+	bool dummy0:1;
 	bool dummy1:1;
 	bool dummy2:1;
 	bool dummy3:1;
@@ -33,6 +34,7 @@ struct ModbusCoilsMap{
 };
 
 struct ModbusHoldingRegistersMap {
+	float32 dummy0;
 	float32 dummy1;
 	float32 dummy2;
 	float32 dummy3;

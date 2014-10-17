@@ -48,7 +48,7 @@ void slave_loopStates(ModbusSlave *self){
 void slave_create(ModbusSlave *self){
 
 	// Configure the 3.5c time for timer
-	// For baudrates higher than 38400 is recommended a fixed value
+	// For baudrates higher than 19200 is recommended a fixed value
 #if SERIAL_BAUDRATE <= 19200
 	Uint16 serialFrameSize = SERIAL_START_STOP_NUMBER_BITS
 			+ SERIAL_BITS_NUMBER
