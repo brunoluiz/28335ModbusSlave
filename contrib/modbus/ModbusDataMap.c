@@ -8,6 +8,11 @@
 #include "ModbusDataMap.h"
 #include "Log.h"
 
+ModbusInputsMap construct_ModbusInputsMap(){
+	ModbusInputsMap inputsMap = {0};
+	return inputsMap;
+}
+
 ModbusCoilsMap construct_ModbusCoilsMap(){
 	ModbusCoilsMap coilsMap = {0};
 	return coilsMap;
@@ -15,5 +20,10 @@ ModbusCoilsMap construct_ModbusCoilsMap(){
 
 ModbusHoldingRegistersMap construct_ModbusHoldingRegistersMap(){
 	ModbusHoldingRegistersMap registersMap = {0};
+	return registersMap;
+}
+
+ModbusInputRegistersMap construct_ModbusInputRegistersMap(){
+	ModbusInputRegistersMap registersMap = {0};
 	return registersMap;
 }

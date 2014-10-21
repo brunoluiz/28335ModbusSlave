@@ -11,7 +11,9 @@
 #include "PlataformSettings.h"
 
 typedef struct ModbusCoilsMap ModbusCoilsMap;
+typedef struct ModbusInputsMap ModbusInputsMap;
 typedef struct ModbusHoldingRegistersMap ModbusHoldingRegistersMap;
+typedef struct ModbusInputRegistersMap ModbusInputRegistersMap;
 
 struct ModbusCoilsMap{
 	bool dummy0:1;
@@ -31,6 +33,38 @@ struct ModbusCoilsMap{
 	bool dummy14:1;
 	bool dummy15:1;
 	bool dummy16:1;
+	bool dummy17:1;
+	bool dummy18:1;
+};
+
+struct ModbusInputsMap{
+	bool dummy0:1;
+	bool dummy1:1;
+	bool dummy2:1;
+	bool dummy3:1;
+	bool dummy4:1;
+	bool dummy5:1;
+	bool dummy6:1;
+	bool dummy7:1;
+	bool dummy8:1;
+	bool dummy9:1;
+	bool dummy10:1;
+	bool dummy11:1;
+	bool dummy12:1;
+	bool dummy13:1;
+	bool dummy14:1;
+	bool dummy15:1;
+	bool dummy16:1;
+	bool dummy17:1;
+	bool dummy18:1;
+};
+
+struct ModbusInputRegistersMap {
+	float32 dummy0;
+	float32 dummy1;
+	float32 dummy2;
+	float32 dummy3;
+	float32 dummy4;
 };
 
 struct ModbusHoldingRegistersMap {
@@ -41,7 +75,9 @@ struct ModbusHoldingRegistersMap {
 	float32 dummy4;
 };
 
+ModbusInputsMap construct_ModbusInputsMap();
 ModbusCoilsMap construct_ModbusCoilsMap();
 ModbusHoldingRegistersMap construct_ModbusHoldingRegistersMap();
+ModbusInputRegistersMap construct_ModbusInputRegistersMap();
 
 #endif /* MODBUSVARMAP_H_ */

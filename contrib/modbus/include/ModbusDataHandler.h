@@ -9,18 +9,19 @@ typedef struct ModbusDataHandler ModbusDataHandler;
 typedef struct ModbusSlave ModbusSlave;
 
 struct ModbusDataHandler {
-	void (*loopStates)();
-	void (*readCoils)(ModbusSlave *slave);
-	void (*readHoldingRegisters)(ModbusSlave *slave);
+	void (*readDigitalData)(ModbusSlave *slave, ModbusFunctionCode funcCode);
+	void (*readAnalogData)(ModbusSlave *slave, ModbusFunctionCode funcCode);
+
 	void (*presetSingleRegister)(ModbusSlave *slave);
 	void (*forceSingleCoil)(ModbusSlave *slave);
 	void (*presetMultipleRegisters)(ModbusSlave *slave);
 	void (*forceMultipleCoils)(ModbusSlave *slave);
+
 	void (*exception)(ModbusSlave *slave, ModbusError exceptionCode);
 };
 
-inline void datahandler_readHoldingRegisters(ModbusSlave *slave);
-inline void datahandler_readCoils(ModbusSlave *slave);
+inline void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode);
+inline void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode);
 inline void datahandler_presetSingleRegister(ModbusSlave *slave);
 inline void datahandler_forceSingleCoil(ModbusSlave *slave);
 inline void datahandler_presetMultipleRegisters(ModbusSlave *slave);

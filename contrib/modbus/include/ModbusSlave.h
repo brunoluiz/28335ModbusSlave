@@ -17,8 +17,10 @@ struct ModbusSlave {
 	ModbusData dataRequest;
 	ModbusData dataResponse;
 
+	ModbusInputsMap inputs;
 	ModbusCoilsMap coils;
-	ModbusHoldingRegistersMap registers;
+	ModbusInputRegistersMap inputRegisters;
+	ModbusHoldingRegistersMap holdingRegisters;
 
 	Serial serial;
 	Timer timer;

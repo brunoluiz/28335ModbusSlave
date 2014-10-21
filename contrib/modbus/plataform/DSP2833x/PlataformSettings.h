@@ -36,6 +36,9 @@
 	#define bool 	Uint16
 #endif
 
+#define DSP28_SCIC 	0
+#define DSP28_SCIB 	0
+
 extern void InitSci(void);
 extern void InitSciGpio(void);
 extern void InitSciaGpio(void);

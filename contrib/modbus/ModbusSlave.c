@@ -4,6 +4,11 @@
 #include "ModbusSettings.h"
 #include "Log.h"
 
+#if DEBUG_UTILS_PROFILING
+#include "Profiling.h"
+ProfilingTool profiling;
+#endif
+
 void slave_loopStates(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 	switch (self->state) {
@@ -68,6 +73,10 @@ void slave_create(ModbusSlave *self){
 	// Configure timer with the 3.5c time for timeout
 	self->timer.init(&self->timer, mbT35);
 
+#if DEBUG_UTILS_PROFILING
+	profiling = construct_ProfilingTool();
+#endif
+
 	self->state = MB_START;
 }
 
@@ -86,6 +95,10 @@ void slave_start(ModbusSlave *self){
 	self->serial.clear();
 
 	self->timer.start();
+#if DEBUG_UTILS_PROFILING
+	profiling.start(&profiling);
+#endif
+
 	self->state = MB_TIMER_T35_WAIT;
 }
 
@@ -97,6 +110,10 @@ void slave_timerT35Wait(ModbusSlave *self){
 	if ( self->timer.expiredTimer(&self->timer) ) {
 		self->timer.stop();
 		self->state = MB_IDLE;
+
+		#if DEBUG_UTILS_PROFILING
+		profiling.registerStep(&profiling, profiling_MB_TIMER_T35_WAIT);
+		#endif
 	}
 }
 
@@ -148,6 +165,10 @@ void slave_idle(ModbusSlave *self){
 	} else {
 		self->state = MB_RECEIVE;
 	}
+
+	#if DEBUG_UTILS_PROFILING
+	profiling.registerStep(&profiling, profiling_MB_IDLE);
+	#endif
 }
 
 // STATE: MB_RECEIVE
@@ -194,6 +215,10 @@ void slave_receive(ModbusSlave *self){
 	}
 
 	self->state = MB_PROCESS;
+
+	#if DEBUG_UTILS_PROFILING
+	profiling.registerStep(&profiling, profiling_MB_RECEIVE);
+	#endif
 }
 
 // STATE: MB_PROCESS
@@ -202,7 +227,7 @@ void slave_receive(ModbusSlave *self){
 void slave_process(ModbusSlave *self){
 	bool jumpProcessing = false;
 
-#if (MB_RTU_TCP == false)
+	#if (MB_RTU_TCP == false)
 	Uint16 receivedCrc = self->dataRequest.crc;
 	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
 	Uint16 generatedCrc = generateCrc(self->dataRequest.getTransmitStringWithoutCRC(&self->dataRequest),
@@ -222,17 +247,25 @@ void slave_process(ModbusSlave *self){
 		self->state = MB_START;
 		jumpProcessing = true;
 	}
-#endif
+	#endif
 
 	if (jumpProcessing == false) {
 		// Check the function code and do some action using dataHandler
 		if (self->dataRequest.functionCode == MB_FUNC_READ_COIL){
 			MB_SLAVE_DEBUG("Reading coils");
-			self->dataHandler.readCoils(self);
+			self->dataHandler.readDigitalData(self, MB_FUNC_READ_COIL);
+		}
+		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUT){
+			MB_SLAVE_DEBUG("Reading coils");
+			self->dataHandler.readDigitalData(self, MB_FUNC_READ_INPUT);
+		}
+		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUTREGISTERS){
+			MB_SLAVE_DEBUG("Reading holding registers");
+			self->dataHandler.readAnalogData(self, MB_FUNC_READ_INPUTREGISTERS);
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS){
 			MB_SLAVE_DEBUG("Reading holding registers");
-			self->dataHandler.readHoldingRegisters(self);
+			self->dataHandler.readAnalogData(self, MB_FUNC_READ_HOLDINGREGISTERS);
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER){
 			MB_SLAVE_DEBUG("Presetting holding register");
@@ -256,6 +289,10 @@ void slave_process(ModbusSlave *self){
 		}
 		self->state = MB_TRANSMIT;
 	}
+
+	#if DEBUG_UTILS_PROFILING
+	profiling.registerStep(&profiling, profiling_MB_PROCESS);
+	#endif
 }
 
 // STATE: MB_TRANSMIT
@@ -267,6 +304,11 @@ void slave_transmit(ModbusSlave *self){
 			self->dataResponse.size);
 
 	self->state = MB_START;
+
+	#if DEBUG_UTILS_PROFILING
+	profiling.registerStep(&profiling, profiling_MB_TRANSMIT);
+	profiling.stop(&profiling);
+	#endif
 }
 
 void slave_destroy(ModbusSlave *self){
@@ -287,7 +329,9 @@ ModbusSlave construct_ModbusSlave(){
 	modbusSlave.dataHandler = construct_ModbusDataHandler();
 
 	modbusSlave.coils = construct_ModbusCoilsMap();
-	modbusSlave.registers = construct_ModbusHoldingRegistersMap();
+	modbusSlave.inputs = construct_ModbusInputsMap();
+	modbusSlave.inputRegisters = construct_ModbusInputRegistersMap();
+	modbusSlave.holdingRegisters = construct_ModbusHoldingRegistersMap();
 
 	modbusSlave.loopStates = slave_loopStates;
 	modbusSlave.create = slave_create;

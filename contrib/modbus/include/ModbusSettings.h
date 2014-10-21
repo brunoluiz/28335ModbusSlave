@@ -23,6 +23,8 @@
 
 
 // Log settings ===========================================
+#define DEBUG_UTILS_PROFILING				true
+
 // Will be used at Log.h
 #define DEBUG_LOG_ENABLED					false
 

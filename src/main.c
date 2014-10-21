@@ -1,5 +1,4 @@
 #include "ModbusSlave.h"
-#include "stdio.h"
 ModbusSlave mb;
 
 int main(){
@@ -12,8 +11,8 @@ int main(){
 	mb.coils.dummy10 = 1;
 	mb.coils.dummy15 = 1;
 
-	mb.registers.dummy1 = 20.2;
-	mb.registers.dummy3 = 20.2;
+	mb.holdingRegisters.dummy1 = 20.2;
+	mb.holdingRegisters.dummy3 = 20.2;
 
 	while(1) {
 		mb.loopStates(&mb);

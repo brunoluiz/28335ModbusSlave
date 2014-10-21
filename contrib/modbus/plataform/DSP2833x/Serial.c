@@ -14,7 +14,7 @@ void serial_clear(){
 
 		// TODO: Check if is necessary
 		// Clears FIFO buffer
-		for (i = SciaRegs.SCIFFRX.bit.RXFFST; i >= 0; i--)
+		for (i = SciaRegs.SCIFFRX.bit.RXFFST; i > 0; i--)
 			destroyFIFO = SciaRegs.SCIRXBUF.all;
 	}
 
@@ -145,7 +145,7 @@ void serial_transmitData(Uint16 * data, Uint16 size){
 	}
 
 	// If you want to wait until the TX buffer is empty, uncomment line below
-	//while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
+//	while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
 }
 
 // Read data from buffer (byte per byte)

@@ -5,7 +5,7 @@
 #include "Crc.h"
 #include "math.h"
 
-void datahandler_readCoils(ModbusSlave *slave) {
+void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode) {
 	// Each requested register has two bytes inside of it, so the code has to multiply by 2
 	Uint16 firstDataAddress = (slave->dataRequest.content[MB_READ_ADDRESS_HIGH] << 8) |
 			slave->dataRequest.content[MB_READ_ADDRESS_LOW];
@@ -19,11 +19,18 @@ void datahandler_readCoils(ModbusSlave *slave) {
 	Uint16 reg16ReturnIdx = 0;
 
 	// Reference to MODBUS Data Map
-	char * coilsPtr;
-	coilsPtr = (char *)&(slave->coils);
+	char * dataPtr;
+
+	// dataPtr points to the right struct (depending on passed funcCode)
+	if (funcCode == MB_FUNC_READ_COIL){
+		dataPtr = (char *)&(slave->coils);
+	}
+	else if(funcCode == MB_FUNC_READ_INPUT){
+		dataPtr = (char *)&(slave->inputs);
+	}
 
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
-	slave->dataResponse.functionCode = MB_FUNC_READ_COIL;
+	slave->dataResponse.functionCode = funcCode;
 
 	// Number of Bytes
 	slave->dataResponse.content[slave->dataResponse.contentIdx++] = numberOfBytes;
@@ -33,7 +40,7 @@ void datahandler_readCoils(ModbusSlave *slave) {
 		Uint16 coilsNum = totalDataRequested - idx*8;
 		Uint16 padding = idx + firstDataAddress - reg16ReturnIdx;
 		Uint16 content = 0;
-		content = *(coilsPtr + padding) >> (reg16ReturnIdx*8);
+		content = *(dataPtr + padding) >> (reg16ReturnIdx*8);
 
 		if(coilsNum >= 8) {
 			slave->dataResponse.content[slave->dataResponse.contentIdx++] = content & 0x00FF;
@@ -59,7 +66,7 @@ void datahandler_readCoils(ModbusSlave *slave) {
 	MB_DATA_HANDLER_DEBUG();
 }
 
-void datahandler_readHoldingRegisters(ModbusSlave *slave) {
+void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode) {
 	// Each requested register has two bytes inside of it, so the code has to multiply by 2
 	Uint16 firstDataAddress = (slave->dataRequest.content[MB_READ_ADDRESS_HIGH] << 8) |
 			slave->dataRequest.content[MB_READ_ADDRESS_LOW];
@@ -72,10 +79,15 @@ void datahandler_readHoldingRegisters(ModbusSlave *slave) {
 
 	// Reference to MODBUS Data Map
 	char * registersPtr;
-	registersPtr = (char *)&(slave->registers);
+	if (funcCode == MB_FUNC_READ_HOLDINGREGISTERS){
+		registersPtr = (char *)&(slave->holdingRegisters);
+	}
+	else if(funcCode == MB_FUNC_READ_INPUTREGISTERS){
+		registersPtr = (char *)&(slave->inputRegisters);
+	}
 
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
-	slave->dataResponse.functionCode = MB_FUNC_READ_HOLDINGREGISTERS;
+	slave->dataResponse.functionCode = funcCode;
 
 	// Number of Bytes
 	slave->dataResponse.content[slave->dataResponse.contentIdx++] = totalDataRequested * 2;
@@ -105,14 +117,13 @@ void datahandler_readHoldingRegisters(ModbusSlave *slave) {
 }
 
 void datahandler_presetSingleRegister(ModbusSlave *slave){
-	Uint16 * memAddr;
 	Uint16 dataAddress = (slave->dataRequest.content[MB_WRITE_ADDRESS_HIGH] << 8) |
 				slave->dataRequest.content[MB_WRITE_ADDRESS_LOW];
 	Uint16 * transmitString;
 
 	// Reference to MODBUS Data Map
 	char * registersPtr;
-	registersPtr = (char *)&(slave->registers);
+	registersPtr = (char *)&(slave->holdingRegisters);
 
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
 	slave->dataResponse.functionCode = MB_FUNC_WRITE_HOLDINGREGISTER;
@@ -139,7 +150,6 @@ void datahandler_presetSingleRegister(ModbusSlave *slave){
 }
 
 void datahandler_forceSingleCoil(ModbusSlave *slave){
-	Uint16 * memAddr;
 	Uint16 dataAddress = (slave->dataRequest.content[MB_WRITE_ADDRESS_HIGH] << 8) |
 				slave->dataRequest.content[MB_WRITE_ADDRESS_LOW];
 	Uint16 coilAddress = floor(dataAddress/16);
@@ -194,7 +204,7 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 
 	// Reference to MODBUS Data Map
 	char * registersPtr;
-	registersPtr = (char *)&(slave->registers);
+	registersPtr = (char *)&(slave->holdingRegisters);
 
 	// Prepare response (it is the same thing of dataRequest, but you can do some checks at writen registers)
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
@@ -223,20 +233,19 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 	MB_DATA_HANDLER_DEBUG();
 }
 
-
 void datahandler_forceMultipleCoils(ModbusSlave *slave){
 	Uint16 idx;
 	Uint16 * transmitString;
 	Uint16 coilAddress = (slave->dataRequest.content[MB_WRITE_N_ADDRESS_HIGH] << 8) |
 				slave->dataRequest.content[MB_WRITE_N_ADDRESS_LOW];
-	Uint16 totalBytes = slave->dataRequest.content[MB_WRITE_N_BYTES];
+//	Uint16 totalBytes = slave->dataRequest.content[MB_WRITE_N_BYTES];
 	Uint16 totalCoils = (slave->dataRequest.content[MB_WRITE_N_QUANTITY_HIGH] << 8) |
 			slave->dataRequest.content[MB_WRITE_N_QUANTITY_LOW];
 	Uint16 addrPadding;
 	Uint16 totalPadding;
 	Uint16 ptrPadding;
-	char tempContent;
-	char maskLeftShift , maskRightShift;
+	char tempAddrContent, tempCoilContent;
+	char mask;
 
 	// Reference to MODBUS Data Map
 	char * coilsPtr;
@@ -254,20 +263,18 @@ void datahandler_forceMultipleCoils(ModbusSlave *slave){
 	// Not fully implemented: only work with 8 coils
 
 	addrPadding = coilAddress % 16;
-	for (idx = 0; idx < totalBytes; idx++) {
-		Uint16 coilValue = slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx];
-		Uint16 idxPadding = idx % 2 ;
-		ptrPadding = coilAddress/16 + idxPadding;
-		totalPadding = addrPadding + idxPadding*8 + totalCoils%8;
+	for (idx = 0; idx < totalCoils; idx++) {
+		ptrPadding = coilAddress/16 + idx/16;
+		totalPadding = addrPadding + idx%16;
 
-		tempContent = *( coilsPtr );
+		tempAddrContent = *( coilsPtr );
 
-		coilValue = coilValue << (addrPadding + idxPadding*8);
-		maskLeftShift = (0xFFFF << totalPadding ) | ~(0xFFFF << addrPadding );
-		maskRightShift = ~(0xFFFF >> ( 16 - totalPadding));
-		tempContent = (tempContent & maskLeftShift ) |
-				(tempContent & maskRightShift);
-		*(coilsPtr + ptrPadding) = tempContent | coilValue;
+		mask = (1 << totalPadding );
+
+		tempCoilContent = slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx/8] >> idx%8;
+		tempCoilContent = ( tempCoilContent << totalPadding ) & mask;
+		tempAddrContent = ( tempAddrContent & ~mask );
+		*(coilsPtr + ptrPadding) = tempAddrContent | tempCoilContent;
 	}
 
 	// Data response size
@@ -299,12 +306,14 @@ void datahandler_exception(ModbusSlave *slave, ModbusError exceptionCode){
 ModbusDataHandler construct_ModbusDataHandler(){
 	ModbusDataHandler modbusDataHandler;
 
-	modbusDataHandler.readCoils = datahandler_readCoils;
-	modbusDataHandler.readHoldingRegisters = datahandler_readHoldingRegisters;
+	modbusDataHandler.readDigitalData = datahandler_readDigitalData;
+	modbusDataHandler.readAnalogData = datahandler_readAnalogData;
+
 	modbusDataHandler.presetSingleRegister = datahandler_presetSingleRegister;
 	modbusDataHandler.forceSingleCoil = datahandler_forceSingleCoil;
 	modbusDataHandler.presetMultipleRegisters = datahandler_presetMultipleRegisters;
 	modbusDataHandler.forceMultipleCoils = datahandler_forceMultipleCoils;
+
 	modbusDataHandler.exception = datahandler_exception;
 
 	MB_DATA_HANDLER_DEBUG();
