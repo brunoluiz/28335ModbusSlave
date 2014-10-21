@@ -8,22 +8,30 @@
 #include "ModbusDataMap.h"
 #include "Log.h"
 
-ModbusInputsMap construct_ModbusInputsMap(){
-	ModbusInputsMap inputsMap = {0};
-	return inputsMap;
-}
-
+#if MB_COILS_ENABLED
 ModbusCoilsMap construct_ModbusCoilsMap(){
 	ModbusCoilsMap coilsMap = {0};
 	return coilsMap;
 }
+#endif
 
-ModbusHoldingRegistersMap construct_ModbusHoldingRegistersMap(){
-	ModbusHoldingRegistersMap registersMap = {0};
-	return registersMap;
+#if MB_INPUTS_ENABLED
+ModbusInputsMap construct_ModbusInputsMap(){
+	ModbusInputsMap inputsMap = {0};
+	return inputsMap;
 }
+#endif
 
+#if MB_INPUT_REGISTERS_ENABLED
 ModbusInputRegistersMap construct_ModbusInputRegistersMap(){
 	ModbusInputRegistersMap registersMap = {0};
 	return registersMap;
 }
+#endif
+
+#if MB_HOLDING_REGISTERS_ENABLED
+ModbusHoldingRegistersMap construct_ModbusHoldingRegistersMap(){
+	ModbusHoldingRegistersMap registersMap = {0};
+	return registersMap;
+}
+#endif

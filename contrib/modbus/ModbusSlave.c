@@ -251,35 +251,35 @@ void slave_process(ModbusSlave *self){
 
 	if (jumpProcessing == false) {
 		// Check the function code and do some action using dataHandler
-		if (self->dataRequest.functionCode == MB_FUNC_READ_COIL){
+		if (self->dataRequest.functionCode == MB_FUNC_READ_COIL && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Reading coils");
 			self->dataHandler.readDigitalData(self, MB_FUNC_READ_COIL);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUT){
+		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUT && MB_INPUTS_ENABLED){
 			MB_SLAVE_DEBUG("Reading coils");
 			self->dataHandler.readDigitalData(self, MB_FUNC_READ_INPUT);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUTREGISTERS){
+		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUTREGISTERS && MB_INPUT_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Reading holding registers");
 			self->dataHandler.readAnalogData(self, MB_FUNC_READ_INPUTREGISTERS);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS){
+		else if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Reading holding registers");
 			self->dataHandler.readAnalogData(self, MB_FUNC_READ_HOLDINGREGISTERS);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER){
+		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Presetting holding register");
 			self->dataHandler.presetSingleRegister(self);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_COIL){
+		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_COIL && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Forcing coil");
 			self->dataHandler.forceSingleCoil(self);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS){
+		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Presetting multiple holding registers");
 			self->dataHandler.presetMultipleRegisters(self);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS){
+		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Forcing multiple coils");
 			self->dataHandler.forceMultipleCoils(self);
 		}
@@ -328,10 +328,18 @@ ModbusSlave construct_ModbusSlave(){
 
 	modbusSlave.dataHandler = construct_ModbusDataHandler();
 
+#if MB_COILS_ENABLED
 	modbusSlave.coils = construct_ModbusCoilsMap();
+#endif
+#if MB_INPUTS_ENABLED
 	modbusSlave.inputs = construct_ModbusInputsMap();
-	modbusSlave.inputRegisters = construct_ModbusInputRegistersMap();
+#endif
+#if MB_HOLDING_REGISTERS_ENABLED
 	modbusSlave.holdingRegisters = construct_ModbusHoldingRegistersMap();
+#endif
+#if MB_INPUT_REGISTERS_ENABLED
+	modbusSlave.inputRegisters = construct_ModbusInputRegistersMap();
+#endif
 
 	modbusSlave.loopStates = slave_loopStates;
 	modbusSlave.create = slave_create;

@@ -17,10 +17,18 @@ struct ModbusSlave {
 	ModbusData dataRequest;
 	ModbusData dataResponse;
 
-	ModbusInputsMap inputs;
+#if MB_COILS_ENABLED
 	ModbusCoilsMap coils;
-	ModbusInputRegistersMap inputRegisters;
+#endif
+#if MB_INPUTS_ENABLED
+	ModbusInputsMap inputs;
+#endif
+#if MB_HOLDING_REGISTERS_ENABLED
 	ModbusHoldingRegistersMap holdingRegisters;
+#endif
+#if MB_INPUT_REGISTERS_ENABLED
+	ModbusInputRegistersMap inputRegisters;
+#endif
 
 	Serial serial;
 	Timer timer;

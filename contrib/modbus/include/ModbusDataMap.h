@@ -8,13 +8,11 @@
 #ifndef MODBUSVARMAP_H_
 #define MODBUSVARMAP_H_
 
+#include "ModbusSettings.h"
 #include "PlataformSettings.h"
 
+#if MB_COILS_ENABLED
 typedef struct ModbusCoilsMap ModbusCoilsMap;
-typedef struct ModbusInputsMap ModbusInputsMap;
-typedef struct ModbusHoldingRegistersMap ModbusHoldingRegistersMap;
-typedef struct ModbusInputRegistersMap ModbusInputRegistersMap;
-
 struct ModbusCoilsMap{
 	bool dummy0:1;
 	bool dummy1:1;
@@ -37,6 +35,11 @@ struct ModbusCoilsMap{
 	bool dummy18:1;
 };
 
+ModbusCoilsMap construct_ModbusCoilsMap();
+#endif
+
+#if MB_INPUTS_ENABLED
+typedef struct ModbusInputsMap ModbusInputsMap;
 struct ModbusInputsMap{
 	bool dummy0:1;
 	bool dummy1:1;
@@ -59,14 +62,11 @@ struct ModbusInputsMap{
 	bool dummy18:1;
 };
 
-struct ModbusInputRegistersMap {
-	float32 dummy0;
-	float32 dummy1;
-	float32 dummy2;
-	float32 dummy3;
-	float32 dummy4;
-};
+ModbusInputsMap construct_ModbusInputsMap();
+#endif
 
+#if MB_HOLDING_REGISTERS_ENABLED
+typedef struct ModbusHoldingRegistersMap ModbusHoldingRegistersMap;
 struct ModbusHoldingRegistersMap {
 	float32 dummy0;
 	float32 dummy1;
@@ -75,9 +75,20 @@ struct ModbusHoldingRegistersMap {
 	float32 dummy4;
 };
 
-ModbusInputsMap construct_ModbusInputsMap();
-ModbusCoilsMap construct_ModbusCoilsMap();
 ModbusHoldingRegistersMap construct_ModbusHoldingRegistersMap();
+#endif
+
+#if MB_INPUT_REGISTERS_ENABLED
+typedef struct ModbusInputRegistersMap ModbusInputRegistersMap;
+struct ModbusInputRegistersMap {
+	float32 dummy0;
+	float32 dummy1;
+	float32 dummy2;
+	float32 dummy3;
+	float32 dummy4;
+};
+
 ModbusInputRegistersMap construct_ModbusInputRegistersMap();
+#endif
 
 #endif /* MODBUSVARMAP_H_ */

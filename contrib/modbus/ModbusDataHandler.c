@@ -25,9 +25,11 @@ void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode
 	if (funcCode == MB_FUNC_READ_COIL){
 		dataPtr = (char *)&(slave->coils);
 	}
+#if MB_INPUTS_ENABLED
 	else if(funcCode == MB_FUNC_READ_INPUT){
 		dataPtr = (char *)&(slave->inputs);
 	}
+#endif
 
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
 	slave->dataResponse.functionCode = funcCode;
@@ -82,9 +84,11 @@ void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode)
 	if (funcCode == MB_FUNC_READ_HOLDINGREGISTERS){
 		registersPtr = (char *)&(slave->holdingRegisters);
 	}
+#if MB_INPUT_REGISTERS_ENABLED
 	else if(funcCode == MB_FUNC_READ_INPUTREGISTERS){
 		registersPtr = (char *)&(slave->inputRegisters);
 	}
+#endif
 
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
 	slave->dataResponse.functionCode = funcCode;
