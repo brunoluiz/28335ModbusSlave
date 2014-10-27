@@ -5,18 +5,18 @@
 
 // Clear flags of overflow
 void serial_clear(){
+	Uint16 i, destroyFifo;
+
 	SERIAL_DEBUG();
 
 	// Reset Serial in case of error
 	if(SciaRegs.SCIRXST.bit.RXERROR == true){
-		Uint16 i, destroyFIFO;
 		SciaRegs.SCICTL1.bit.SWRESET=0;
-
-		// TODO: Check if is necessary
-		// Clears FIFO buffer
-		for (i = SciaRegs.SCIFFRX.bit.RXFFST; i > 0; i--)
-			destroyFIFO = SciaRegs.SCIRXBUF.all;
 	}
+
+	// Clears FIFO buffer (if there is any data)
+	for (i = SciaRegs.SCIFFRX.bit.RXFFST; i > 0; i--)
+		destroyFifo = SciaRegs.SCIRXBUF.all;
 
 	// Reset FIFO
 	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
