@@ -1,18 +1,15 @@
 #ifndef PROFILING_H_
 #define PROFILING_H_
 
-#define PROFILING_SIZE_TIME_MEASURES	10
-#define PROFILING_SIZE_MAX_STEPS		6
+#define PROFILING_SIZE_TIME_MEASURES	5
+#define PROFILING_SIZE_MAX_STEPS		5
 #define PROFILING_DSPCLOCK 				150U // 150 Mhz
 #define PROFILING_EXTRA_CALCS			1	// true
-#define PROFILING_BREAK_MAX_MEASURES	0	// true
+#define PROFILING_BREAK_MAX_MEASURES	1	// true
 
 typedef struct ProfilingTool ProfilingTool;
 
 struct ProfilingTool {
-	long double timeMeasures[PROFILING_SIZE_TIME_MEASURES];
-	long double cycleMeasures[PROFILING_SIZE_TIME_MEASURES];
-
 	unsigned long long cycleMeasuresSteps[PROFILING_SIZE_TIME_MEASURES][PROFILING_SIZE_MAX_STEPS];
 	long double timeMeasuresSteps[PROFILING_SIZE_TIME_MEASURES][PROFILING_SIZE_MAX_STEPS];
 

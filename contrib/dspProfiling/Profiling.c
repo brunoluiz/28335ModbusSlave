@@ -58,9 +58,7 @@ void profiling_stop(ProfilingTool * self) {
 	for(idx = 0; idx < PROFILING_SIZE_TIME_MEASURES; idx++){
 		for(stepIdx = 0; stepIdx < PROFILING_SIZE_MAX_STEPS; stepIdx++){
 			self->timeMeasuresSteps[idx][stepIdx] = (self->cycleMeasuresSteps[idx][stepIdx] / PROFILING_DSPCLOCK);
-			self->cycleMeasures[idx] += self->cycleMeasuresSteps[idx][stepIdx];
 		}
-		self->timeMeasures[idx] = self->cycleMeasures[idx] / PROFILING_DSPCLOCK;
 	}
 #endif
 
@@ -91,7 +89,6 @@ ProfilingTool construct_ProfilingTool(){
 
 	// Reset timeMeasures arrays
 	for(idx = 0; idx < PROFILING_SIZE_TIME_MEASURES; idx++){
-		profiling.timeMeasures[idx] = 0;
 		for(stepIdx = 0; stepIdx < PROFILING_SIZE_MAX_STEPS; stepIdx++) {
 			profiling.timeMeasuresSteps[idx][stepIdx] = 0;
 			profiling.cycleMeasuresSteps[idx][stepIdx] = 0;
