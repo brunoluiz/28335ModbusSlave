@@ -7,6 +7,7 @@
 // Modbus settings ========================================
 #define MB_SLAVE_ID			0x01
 #define MB_RTU_TCP			false			// Disable ID check and CRC check (TCP converter will do that)
+#define MB_BUFFER_SIZE		48
 
 // Memory map settings ====================================
 #define MB_COILS_ENABLED				1

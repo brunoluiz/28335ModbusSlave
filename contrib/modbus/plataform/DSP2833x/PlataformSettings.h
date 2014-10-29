@@ -16,28 +16,11 @@
 //#define CPU_FREQ	150
 //#define LSPCLK 		15000000
 
-// Data types definitions =================================
-
-#ifndef DSP28_DATA_TYPES
-	#define DSP28_DATA_TYPES
-	typedef int                int16;
-	typedef long               int32;
-	typedef long long          int64;
-	typedef unsigned int       Uint16;
-	typedef unsigned long      Uint32;
-	typedef unsigned long long Uint64;
-	typedef float              float32;
-	typedef long double        float64;
-#endif
-
 #ifndef bool
 	#define false   0
 	#define true    1
 	#define bool 	Uint16
 #endif
-
-#define DSP28_SCIC 	0
-#define DSP28_SCIB 	0
 
 extern void InitSci(void);
 extern void InitSciGpio(void);

@@ -9,7 +9,7 @@ typedef enum {
 	profiling_MB_RECEIVE,
 	profiling_MB_PROCESS,
 	profiling_MB_TRANSMIT
-};
+} ModbusProfiling;
 
 // Read codes
  typedef enum {

@@ -9,7 +9,7 @@ struct ModbusData {
 	Uint16 slaveAddress;
 	Uint16 functionCode;
 	Uint16 contentIdx;
-	Uint16 content[16];
+	Uint16 content[48];
 	Uint16 size;
 	Uint16 crc;
 

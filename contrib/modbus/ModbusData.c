@@ -15,7 +15,7 @@ void data_clear(ModbusData *self){
 // Return a string with the data that will be transmited
 // Mostly used for the last step of process: MB_TRANSMIT (serial TX)
  Uint16 * data_getTransmitString(ModbusData *self){
-	static Uint16 string[16] = {0};
+	static Uint16 string[MB_BUFFER_SIZE] = {0};
 	Uint16 stringIndex = 0;
 	Uint16 contentIterator;
 
@@ -37,7 +37,7 @@ void data_clear(ModbusData *self){
 // Return a string with the data that will be transmited (but without CRC)
 // Mostly used to create the CRC (get this string and the size of it and then generate the CRC)
  Uint16 * data_getTransmitStringWithoutCRC(ModbusData *self){
-	static Uint16 string[16] = {0};
+	static Uint16 string[MB_BUFFER_SIZE] = {0};
 	Uint16 stringIndex = 0;
 	Uint16 contentIterator;
 

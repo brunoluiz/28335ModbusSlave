@@ -142,8 +142,8 @@ typedef long double        float64;
 #define DSP28_MCBSPB 1
 #define DSP28_SPIA   1
 #define DSP28_SCIA   1
-#define DSP28_SCIB   1
-#define DSP28_SCIC   1
+#define DSP28_SCIB   0
+#define DSP28_SCIC   0
 #define DSP28_I2CA   1
 #endif  // end DSP28_28335
 

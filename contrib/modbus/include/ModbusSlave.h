@@ -59,6 +59,6 @@ inline void slave_transmit(ModbusSlave *self);
 inline void slave_destroy(ModbusSlave *self);
 ModbusSlave construct_ModbusSlave();
 
-// extern ModbusSlave modbus;
+extern ModbusSlave mb;
 
 #endif
