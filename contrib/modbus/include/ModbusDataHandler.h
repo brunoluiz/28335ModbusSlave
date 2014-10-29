@@ -2,7 +2,6 @@
 #define MODBUS_IO_H_
 
 #include "ModbusDefinitions.h"
-#include "PlataformSettings.h"
 #include "ModbusDataMap.h"
 
 typedef struct ModbusDataHandler ModbusDataHandler;

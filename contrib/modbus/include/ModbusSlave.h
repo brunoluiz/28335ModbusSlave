@@ -45,14 +45,13 @@ struct ModbusSlave {
 	void (*transmit)(ModbusSlave *self);
 	void (*destroy)(ModbusSlave *self);
 
-	Uint16 readInputCounter;
+	bool jumpProcessState;
 };
 
 void slave_loopStates(ModbusSlave *self);
 inline void slave_create(ModbusSlave *self);
 inline void slave_start(ModbusSlave *self);
 inline void slave_timerT35Wait(ModbusSlave *self);
-inline void slave_idle(ModbusSlave *self);
 inline void slave_receive(ModbusSlave *self);
 inline void slave_process(ModbusSlave *self);
 inline void slave_transmit(ModbusSlave *self);

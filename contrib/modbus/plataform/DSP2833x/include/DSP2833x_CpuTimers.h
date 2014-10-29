@@ -23,8 +23,6 @@
 #ifndef DSP2833x_CPU_TIMERS_H
 #define DSP2833x_CPU_TIMERS_H
 
-#include "DSP2833x_Device.h"     // DSP2833x Headerfile Include File
-
 #ifdef __cplusplus
 extern "C" {
 #endif

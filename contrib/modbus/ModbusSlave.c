@@ -1,7 +1,4 @@
 #include "ModbusSlave.h"
-#include "ModbusData.h"
-#include "ModbusDefinitions.h"
-#include "ModbusSettings.h"
 #include "Log.h"
 
 #if DEBUG_UTILS_PROFILING
@@ -23,10 +20,6 @@ void slave_loopStates(ModbusSlave *self){
 	case MB_TIMER_T35_WAIT:
 		MB_SLAVE_DEBUG("State: MB_TIMER_T35_WAIT\n");
 		self->timerT35Wait(self);
-		break;
-	case MB_IDLE:
-		MB_SLAVE_DEBUG("State: MB_IDLE\n");
-		self->idle(self);
 		break;
 	case MB_RECEIVE:
 		MB_SLAVE_DEBUG("State: MB_RECEIVE\n");
@@ -109,7 +102,7 @@ void slave_timerT35Wait(ModbusSlave *self){
 
 	if ( self->timer.expiredTimer(&self->timer) ) {
 		self->timer.stop();
-		self->state = MB_IDLE;
+		self->state = MB_RECEIVE;
 
 		#if DEBUG_UTILS_PROFILING
 		profiling.registerStep(&profiling, profiling_MB_TIMER_T35_WAIT);
@@ -117,11 +110,9 @@ void slave_timerT35Wait(ModbusSlave *self){
 	}
 }
 
-// STATE: MB_IDLE
-// Will stay idle, receiving serial data
-// It has some processes in it to check if the size will be variable
-// Example: writing on multiple registers
-void slave_idle(ModbusSlave *self){
+// STATE: MB_RECEIVE
+// Will receive serial data and store at dataRequest var
+void slave_receive(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
 	// Wait to receive Slave ID and Function Code
@@ -153,66 +144,36 @@ void slave_idle(ModbusSlave *self){
 		self->serial.fifoWaitBuffer = 6;
 	}
 
-	// Waiting RX data (based on fifoWaitBuffer)
-	while ( ( self->serial.rxBufferStatus() < self->serial.fifoWaitBuffer ) &&
-			(self->serial.getRxError() == false ) ){}
+	// Waiting RX data until fifoWaitBuffer == 0
+	// While waiting the data, it already empty the buffer, allowing to receive a lot of data
+	while ( (self->serial.fifoWaitBuffer > 0) && (self->serial.getRxError() == false ) ){
+		if(self->serial.rxBufferStatus() > 0) {
+			self->dataRequest.content[self->dataRequest.contentIdx++] = self->serial.getRxBufferedWord();
+			self->serial.fifoWaitBuffer--;
+		}
+	}
 
 	// If there is any error on reception, it will go to the START state
+	// Else it will get some data from the request
 	if (self->serial.getRxError() == true){
 		self->state = MB_START;
 	} else {
-		self->state = MB_RECEIVE;
-	}
+		// Clears interruptions or overflow flags from serial
+		self->serial.clear();
 
-	#if DEBUG_UTILS_PROFILING
-	profiling.registerStep(&profiling, profiling_MB_IDLE);
-	#endif
-}
-
-// STATE: MB_RECEIVE
-// Treat the received data, putting the serial data on the dataRequest structure
-// The dataRequest.content size can be different for each function code
-void slave_receive(ModbusSlave *self){
-	// Treat received serial data, pushing out of buffer
-	Uint16 interator = 0;
-
-	MB_SLAVE_DEBUG();
-
-	if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS ||
-			self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS ) {
-		while(interator < self->dataRequest.content[MB_WRITE_N_BYTES]){
-			self->dataRequest.content[self->dataRequest.contentIdx++] = self->serial.getRxBufferedWord();
-			interator++;
+		// Configures the size of data request frame
+		// It will be used in some loops on ModbusDataHandler
+		// By default it will use the READ size, because it is always the same (independent of function code)
+		if(self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS || self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS) {
+			self->dataRequest.size = MB_SIZE_REQ_WRITE_N_MINIMUM + self->dataRequest.content[MB_WRITE_N_BYTES];
+		} else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER || self->dataRequest.functionCode == MB_FUNC_FORCE_COIL){
+			self->dataRequest.size = MB_SIZE_REQ_WRITE;
+		} else {
+			self->dataRequest.size = MB_SIZE_REQ_READ;
 		}
+
+		self->state = MB_PROCESS;
 	}
-	else {
-		while(interator < MB_SIZE_CONTENT_NORMAL){
-			self->dataRequest.content[self->dataRequest.contentIdx++] = self->serial.getRxBufferedWord();
-			interator++;
-		}
-	}
-
-	self->dataRequest.crc = (self->serial.getRxBufferedWord() << 8) |
-			self->serial.getRxBufferedWord();
-
-	// Clears interruptions or overflow flags from serial
-	self->serial.clear();
-
-	// Configures the size of data request frame
-	// It will be used in some loops on ModbusDataHandler
-	// By default it will use the READ size, because it is always the same (independent of function code)
-	self->dataRequest.size = MB_SIZE_REQ_READ;
-
-	if(self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS ||
-			self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS) {
-		self->dataRequest.size = MB_SIZE_REQ_WRITE_N_MINIMUM + self->dataRequest.content[MB_WRITE_N_BYTES];
-	}
-	else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER ||
-			self->dataRequest.functionCode == MB_FUNC_FORCE_COIL){
-		self->dataRequest.size = MB_SIZE_REQ_WRITE;
-	}
-
-	self->state = MB_PROCESS;
 
 	#if DEBUG_UTILS_PROFILING
 	profiling.registerStep(&profiling, profiling_MB_RECEIVE);
@@ -223,31 +184,36 @@ void slave_receive(ModbusSlave *self){
 // Do the "magic". Check if the request have the right CRC and is for this device
 // After first checks, it will begin the requested funcion code and prepare the dataResponse
 void slave_process(ModbusSlave *self){
-	bool jumpProcessing = false;
+	self->jumpProcessState = false;
 
-	#if (MB_RTU_TCP == false)
-	Uint16 receivedCrc = self->dataRequest.crc;
+	#if (MB_CHECKS == false)
 	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
-	Uint16 generatedCrc = generateCrc(self->dataRequest.getTransmitStringWithoutCRC(&self->dataRequest),
-		sizeWithoutCrc, false);
+	Uint16 generatedCrc;
+
+	// Get the received CRC
+	self->dataRequest.crc = (self->dataRequest.content[self->dataRequest.contentIdx - 2] << 8) |
+			self->dataRequest.content[self->dataRequest.contentIdx - 1];
+	// Generate CRC code based on received data
+	generatedCrc = generateCrc(self->dataRequest.getTransmitStringWithoutCRC(&self->dataRequest),
+			sizeWithoutCrc, true);
 
 	// Check if the received CRC is equal to locally generated CRC
-	if (generatedCrc != receivedCrc) {
+	if (generatedCrc != self->dataRequest.crc) {
 		MB_SLAVE_DEBUG("Error on CRC!");
 		self->dataHandler.exception(self, MB_ERROR_ILLEGALDATA);
 		self->state = MB_TRANSMIT;
-		jumpProcessing = true;
+		self->jumpProcessState = true;
 	}
 
 	// Requested slave address must be equal of pre-defined ID
 	if (self->dataRequest.slaveAddress != MB_SLAVE_ID && self->dataRequest.slaveAddress != 0){
 		MB_SLAVE_DEBUG("Request is not for this device!");
 		self->state = MB_START;
-		jumpProcessing = true;
+		self->jumpProcessState = true;
 	}
 	#endif
 
-	if (jumpProcessing == false) {
+	if (self->jumpProcessState == false) {
 		// Check the function code and do some action using dataHandler
 		if (self->dataRequest.functionCode == MB_FUNC_READ_COIL && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Reading coils");
@@ -343,13 +309,12 @@ ModbusSlave construct_ModbusSlave(){
 	modbusSlave.create = slave_create;
 	modbusSlave.start = slave_start;
 	modbusSlave.timerT35Wait = slave_timerT35Wait;
-	modbusSlave.idle = slave_idle;
 	modbusSlave.receive = slave_receive;
 	modbusSlave.process = slave_process;
 	modbusSlave.transmit = slave_transmit;
 	modbusSlave.destroy = slave_destroy;
 
-	modbusSlave.readInputCounter = 0;
+	modbusSlave.jumpProcessState = false;
 
 	return modbusSlave;
 }

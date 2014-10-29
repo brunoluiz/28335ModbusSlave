@@ -1,7 +1,12 @@
-#include "PlataformSettings.h"
+#include "DSP2833x_Device.h"     // DSP2833x Headerfile Include File
 #include "DSP2833x_CpuTimers.h"
 #include "Timer.h"
 #include "Log.h"
+
+// For CPU Frequency = 150 Mhz
+#define CPU_FREQ	150
+// For CPU Frequency = 100 Mhz
+//#define CPU_FREQ	100
 
 void timer_resetTimer(){
 	CpuTimer0Regs.TCR.bit.TRB = 1;

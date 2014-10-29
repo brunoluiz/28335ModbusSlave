@@ -9,7 +9,6 @@
 #define MODBUSVARMAP_H_
 
 #include "ModbusSettings.h"
-#include "PlataformSettings.h"
 
 #if MB_COILS_ENABLED
 typedef struct ModbusCoilsMap ModbusCoilsMap;

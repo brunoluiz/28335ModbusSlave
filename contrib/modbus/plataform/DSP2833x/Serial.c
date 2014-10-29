@@ -1,11 +1,23 @@
-#include "PlataformSettings.h"
-#include "DSP2833x_Sci.h"
+#include "DSP2833x_Device.h"     // DSP2833x Headerfile Include File
 #include "Serial.h"
 #include "Log.h"
 
+// CPU Frequency (and LSPCLK) =============================
+// The below values are the most common
+
+// For CPU Frequency = 150 Mhz
+#define CPU_FREQ	150
+#define LSPCLK 	37500000
+// For CPU Frequency = 100 Mhz
+//#define CPU_FREQ	100
+//#define LSPCLK 		20000000
+// Other example (LSPCLK different than the common)
+//#define CPU_FREQ	150
+//#define LSPCLK 		15000000
+
 // Clear flags of overflow
 void serial_clear(){
-	Uint16 i, destroyFifo;
+	static unsigned short i, destroyFifo;
 
 	SERIAL_DEBUG();
 
@@ -141,7 +153,7 @@ void serial_init(Serial *self){
 
 // Transmit variable data based on passed size
 void serial_transmitData(Uint16 * data, Uint16 size){
-	int i = 0;
+	static unsigned short i = 0;
 	SERIAL_DEBUG();
 
 	for (i = 0; i < size; i++){

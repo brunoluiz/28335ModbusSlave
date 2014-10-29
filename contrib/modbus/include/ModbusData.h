@@ -1,7 +1,7 @@
 #ifndef MODBUS_DATA_RESPONSE_H_
 #define MODBUS_DATA_RESPONSE_H_
 
-#include "PlataformSettings.h"
+#include "ModbusSettings.h"
 
 typedef struct ModbusData ModbusData;
 
@@ -9,7 +9,7 @@ struct ModbusData {
 	Uint16 slaveAddress;
 	Uint16 functionCode;
 	Uint16 contentIdx;
-	Uint16 content[48];
+	Uint16 content[MB_BUFFER_SIZE];
 	Uint16 size;
 	Uint16 crc;
 

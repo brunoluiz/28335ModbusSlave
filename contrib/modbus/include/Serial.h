@@ -1,7 +1,7 @@
 #ifndef MODBUS_SERIAL_H_
 #define MODBUS_SERIAL_H_
 
-#include "PlataformSettings.h"
+#include "DataTypes.h"
 
 typedef struct Serial Serial;
 

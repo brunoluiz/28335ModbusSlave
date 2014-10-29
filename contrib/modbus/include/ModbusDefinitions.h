@@ -5,7 +5,6 @@
 
 typedef enum {
 	profiling_MB_TIMER_T35_WAIT = 0,
-	profiling_MB_IDLE,
 	profiling_MB_RECEIVE,
 	profiling_MB_PROCESS,
 	profiling_MB_TRANSMIT

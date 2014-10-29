@@ -1,7 +1,7 @@
 #ifndef MODBUS_TIMER_H_
 #define MODBUS_TIMER_H_
 
-#include "PlataformSettings.h"
+#include "DataTypes.h"
 
 typedef struct Timer Timer;
 

@@ -1,4 +1,7 @@
 #include "ModbusSlave.h"
+#include "DSP2833x_Device.h"
+#include "DSP2833x_GlobalPrototypes.h"
+
 ModbusSlave mb;
 
 int main(){
