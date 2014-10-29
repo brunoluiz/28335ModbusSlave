@@ -122,8 +122,6 @@ void slave_timerT35Wait(ModbusSlave *self){
 // It has some processes in it to check if the size will be variable
 // Example: writing on multiple registers
 void slave_idle(ModbusSlave *self){
-	Uint16 fifoWaitBuffer = 0;
-
 	MB_SLAVE_DEBUG();
 
 	// Wait to receive Slave ID and Function Code
@@ -149,14 +147,14 @@ void slave_idle(ModbusSlave *self){
 		self->dataRequest.content[MB_WRITE_N_BYTES] = self->serial.getRxBufferedWord();
 
 		self->dataRequest.contentIdx = 5;
-		fifoWaitBuffer = self->dataRequest.content[MB_WRITE_N_BYTES] + 2;
+		self->serial.fifoWaitBuffer = self->dataRequest.content[MB_WRITE_N_BYTES] + 2;
 	}
 	else {
-		fifoWaitBuffer = 6;
+		self->serial.fifoWaitBuffer = 6;
 	}
 
 	// Waiting RX data (based on fifoWaitBuffer)
-	while ( ( self->serial.rxBufferStatus() < fifoWaitBuffer ) &&
+	while ( ( self->serial.rxBufferStatus() < self->serial.fifoWaitBuffer ) &&
 			(self->serial.getRxError() == false ) ){}
 
 	// If there is any error on reception, it will go to the START state
