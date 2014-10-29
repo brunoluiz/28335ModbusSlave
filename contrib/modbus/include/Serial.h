@@ -17,6 +17,8 @@ struct Serial {
 	Uint16 parityType;
 	Uint32 baudrate;
 
+	Uint16 fifoWaitBuffer;
+
 	void (*clear)();
 	Uint16 (*rxBufferStatus)();
 	void (*setSerialRxEnabled)(bool status);

@@ -69,25 +69,8 @@ void serial_init(Serial *self){
 
 	EDIS;
 	// END: GOT FROM InitScia() FUNCTION (TEXAS FILES) ////////////////////////////////////////
-
-	// FIFO TX configurations
-	// 0:4 	Interruption level: 0
-	// 6	Clear interruption flag
-	// 13	FIFO Reset
-	// 14	FIFO Enabled
-	// 15	SCI Reset tx/rx
-	SciaRegs.SCIFFTX.all=0xE040;
-
-	// FIFO RX configurations
-	// 0:4 	Interruption level: 16 bits
-	// 6	Clear interruption flag
-	// 13	FIFO Reset
-	SciaRegs.SCIFFRX.all=0x204f;
-
-	// FIFO Control configurations
-	SciaRegs.SCIFFCT.all=0x00;
-
 	// Number of bytes
+
 	switch(self->bitsNumber) {
 		case 8:
 			SciaRegs.SCICCR.bit.SCICHAR = 0x7;
@@ -123,14 +106,35 @@ void serial_init(Serial *self){
 	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;
 	SciaRegs.SCILBAUD = (baudrate & 0x00FF);
 
-	SciaRegs.SCIFFRX.bit.RXFIFORESET=1;
-	SciaRegs.SCIFFTX.bit.TXFIFOXRESET=1;
+	// Enables TX and RX Interrupts
+	SciaRegs.SCICTL2.bit.TXINTENA = 0;
+	SciaRegs.SCIFFTX.bit.TXFFIENA = 0;
+	SciaRegs.SCICTL2.bit.RXBKINTENA = 0;
+	SciaRegs.SCIFFRX.bit.RXFFIENA = 0;
 
-	// Reset the serial
-	 SciaRegs.SCICTL1.bit.RXENA		= 1;
-	 SciaRegs.SCICTL1.bit.TXENA		= 1;
-	// SciaRegs.SCICTL1.bit.SWRESET 	= 1;
-	SciaRegs.SCICTL1.all = 0x23;
+	// FIFO TX configurations
+	SciaRegs.SCIFFTX.bit.TXFFIL = 1;	// Interrupt level
+	SciaRegs.SCIFFTX.bit.SCIFFENA = 1;	// Enables FIFO
+	SciaRegs.SCIFFTX.bit.TXFFINTCLR = 1;	// Clear interrupt flag
+
+	// FIFO: RX configurations
+	SciaRegs.SCIFFRX.bit.RXFFIL = 1;	// Interrupt level
+	SciaRegs.SCIFFRX.bit.RXFFINTCLR = 1;	// Clear interrupt flag
+	SciaRegs.SCIFFRX.bit.RXFFOVRCLR = 1;	// Clear overflow flag
+
+	// FIFO: Control configurations
+	SciaRegs.SCIFFCT.all=0x00;
+
+	// Enable RX and TX and reset the serial
+	SciaRegs.SCICTL1.bit.RXENA	 = 1;
+	SciaRegs.SCICTL1.bit.TXENA	 = 1;
+	SciaRegs.SCICTL1.bit.SWRESET = 1;
+
+	// FIFO: Reset
+	SciaRegs.SCIFFRX.bit.RXFIFORESET = 1;
+	SciaRegs.SCIFFTX.bit.TXFIFOXRESET = 1;
+	SciaRegs.SCIFFTX.bit.SCIRST = 0;
+	SciaRegs.SCIFFTX.bit.SCIRST = 1;
 
 	SERIAL_DEBUG();
 }
@@ -142,6 +146,10 @@ void serial_transmitData(Uint16 * data, Uint16 size){
 
 	for (i = 0; i < size; i++){
 		SciaRegs.SCITXBUF= data[i];
+
+		if(i%4 == 0){
+			while (SciaRegs.SCICTL2.bit.TXEMPTY != true) ;
+		}
 	}
 
 	// If you want to wait until the TX buffer is empty, uncomment line below
@@ -176,6 +184,8 @@ Serial construct_Serial(){
 	serial.transmitData = serial_transmitData;
 	serial.getRxBufferedWord = serial_getRxBufferedWord;
 	serial.getRxError = serial_getRxError;
+
+	serial.fifoWaitBuffer = 0;
 
 	SERIAL_DEBUG();
 
