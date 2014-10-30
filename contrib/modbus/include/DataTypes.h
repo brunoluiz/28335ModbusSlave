@@ -11,7 +11,7 @@
 #ifndef bool
 #define false   0
 #define true    1
-#define bool 	char
+#define bool 	unsigned int
 #endif
 
 #ifndef DSP28_DATA_TYPES
