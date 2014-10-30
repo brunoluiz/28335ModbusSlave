@@ -27,7 +27,7 @@ Another way to include the right paths is changing the "Include Options". At CCS
  Don't forget to exclude from compilation the contrib/dspProfiling and contrib/DSP2833x (right mouse click > Exclude from Build).
  
  Implementing
- ------------
+ ============
  
  Normally this code will be implemented at main.c
  
