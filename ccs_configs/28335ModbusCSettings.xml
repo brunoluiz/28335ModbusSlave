@@ -2,43 +2,35 @@
 <cdtprojectproperties>
 <section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
 <language name="C++ Source File">
-<includepath workspace_path="true">/${ProjName}/contrib/modbus</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_common/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_headers/include</includepath>
-<includepath>${CG_TOOL_ROOT}/include</includepath>
-
-</language>
-<language name="Assembly Source File">
-<includepath workspace_path="true">/${ProjName}/contrib/modbus</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x/include</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_common/include</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_headers/include</includepath>
-<includepath>${CG_TOOL_ROOT}/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
+<includepath>c:/ti/ccsv6/tools/compiler/c2000_6.2.7/include</includepath>
 
 </language>
 <language name="C Source File">
-<includepath workspace_path="true">/${ProjName}/contrib/modbus</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_common/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_headers/include</includepath>
-<includepath>${CG_TOOL_ROOT}/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
+<includepath>c:/ti/ccsv6/tools/compiler/c2000_6.2.7/include</includepath>
 
 </language>
 <language name="Assembly Source File">
-<includepath workspace_path="true">/${ProjName}/contrib/modbus</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x</includepath>
-<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_common/include</includepath>
 <includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_headers/include</includepath>
-<includepath>${CG_TOOL_ROOT}/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
+<includepath>c:/ti/ccsv6/tools/compiler/c2000_6.2.7/include</includepath>
+
+</language>
+<language name="Assembly Source File">
+<includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_common/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/DSP2833x/DSP2833x_headers/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/modbus/plataform/DSP2833x/include</includepath>
+<includepath workspace_path="true">/${ProjName}/contrib/modbus/include</includepath>
+<includepath>c:/ti/ccsv6/tools/compiler/c2000_6.2.7/include</includepath>
 
 </language>
 <language name="Linker Command File">
@@ -55,10 +47,10 @@
 <language name="C++ Source File">
 
 </language>
-<language name="Assembly Source File">
+<language name="C Source File">
 
 </language>
-<language name="C Source File">
+<language name="Assembly Source File">
 
 </language>
 <language name="Assembly Source File">
