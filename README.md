@@ -48,5 +48,3 @@ To use the memory map you will need to change the ```ModbusDataMap.h``` file wit
 Don't forget that coils/inputs have the bit field = 1 (bool VAR:1) and that holding registers are meant to be 32 bits (long or float).
  
 If your variables will not be 32 bits, you will have to change some ```ModbusDataHandler.c```. I commented MODIFIABLE at the functions which needs tweaks (readAnalogData, presetSingleRegister, presetMultipleRegisters).
- 
- 
