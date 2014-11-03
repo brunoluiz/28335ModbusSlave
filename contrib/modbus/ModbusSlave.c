@@ -224,16 +224,35 @@ void slave_process(ModbusSlave *self){
 			self->dataHandler.readDigitalData(self, MB_FUNC_READ_INPUT);
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUTREGISTERS && MB_INPUT_REGISTERS_ENABLED){
-			MB_SLAVE_DEBUG("Reading holding registers");
-			self->dataHandler.readAnalogData(self, MB_FUNC_READ_INPUTREGISTERS);
+			MB_SLAVE_DEBUG("Reading input registers");
+#if MB_INPUT_REGISTERS_ENABLED
+			if( (self->dataRequest.content[MB_READ_ADDRESS_HIGH] | self->dataRequest.content[MB_READ_ADDRESS_LOW] ) +
+					( self->dataRequest.content[MB_READ_TOTALDATA_HIGH] | self->dataRequest.content[MB_READ_TOTALDATA_LOW] ) > sizeof(mb.inputRegisters))
+			{
+				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
+			} else {
+				self->dataHandler.readAnalogData(self, MB_FUNC_READ_INPUTREGISTERS);
+			}
+#endif
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Reading holding registers");
-			self->dataHandler.readAnalogData(self, MB_FUNC_READ_HOLDINGREGISTERS);
+			if( (self->dataRequest.content[MB_READ_ADDRESS_HIGH] | self->dataRequest.content[MB_READ_ADDRESS_LOW]) +
+					(self->dataRequest.content[MB_READ_TOTALDATA_HIGH] | self->dataRequest.content[MB_READ_TOTALDATA_LOW]) > sizeof(mb.holdingRegisters))
+			{
+				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
+			} else {
+				self->dataHandler.readAnalogData(self, MB_FUNC_READ_HOLDINGREGISTERS);
+			}
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Presetting holding register");
-			self->dataHandler.presetSingleRegister(self);
+			if( (self->dataRequest.content[MB_WRITE_ADDRESS_HIGH] | self->dataRequest.content[MB_WRITE_ADDRESS_LOW] ) > sizeof(mb.holdingRegisters))
+			{
+				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
+			} else {
+				self->dataHandler.presetSingleRegister(self);
+			}
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_COIL && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Forcing coil");
@@ -241,7 +260,13 @@ void slave_process(ModbusSlave *self){
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Presetting multiple holding registers");
-			self->dataHandler.presetMultipleRegisters(self);
+			if( (self->dataRequest.content[MB_WRITE_N_ADDRESS_HIGH] | self->dataRequest.content[MB_WRITE_N_ADDRESS_LOW] ) +
+					( self->dataRequest.content[MB_WRITE_N_QUANTITY_HIGH] | self->dataRequest.content[MB_WRITE_N_QUANTITY_LOW] ) > sizeof(mb.holdingRegisters))
+			{
+				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
+			} else {
+				self->dataHandler.presetMultipleRegisters(self);
+			}
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Forcing multiple coils");
