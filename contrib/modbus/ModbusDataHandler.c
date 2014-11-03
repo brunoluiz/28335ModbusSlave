@@ -223,7 +223,11 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 
 	// MODIFIABLE: Writes values at specified address values
 	for (idx = 0; idx < totalData; idx++) {
-		Uint16 padding = idx + dataAddress;
+		// Used to invert the ptr to access the register. The values are saved in the format LOW|HIGH instead of HIGH|LOW
+		// This tweak invert the idx to gave the right access based on the order of MODBUS
+		Uint16 idxCorrection = idx^0x0001;
+
+		Uint16 padding = idxCorrection + dataAddress;
 		memAddr = (Uint16 *) (registersPtr + padding);
 		*(memAddr) = (slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx*2] << 8) |
 				slave->dataRequest.content[MB_WRITE_N_VALUES_START_LOW + idx*2];
