@@ -184,11 +184,12 @@ void slave_receive(ModbusSlave *self){
 // Do the "magic". Check if the request have the right CRC and is for this device
 // After first checks, it will begin the requested funcion code and prepare the dataResponse
 void slave_process(ModbusSlave *self){
+	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
+	Uint16 generatedCrc;
+
 	self->jumpProcessState = false;
 
 	#if (MB_CHECKS == false)
-	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
-	Uint16 generatedCrc;
 
 	// Get the received CRC
 	self->dataRequest.crc = (self->dataRequest.content[self->dataRequest.contentIdx - 2] << 8) |
