@@ -59,7 +59,7 @@ void slave_create(ModbusSlave *self){
 
 	// Configure Serial Port A
 	self->serial.baudrate = SERIAL_BAUDRATE;
-	self->serial.parityType = SERIAL_PARITY_NONE;
+	self->serial.parityType = SERIAL_PARITY;
 	self->serial.bitsNumber = SERIAL_BITS_NUMBER;
 	self->serial.init(&self->serial);
 
