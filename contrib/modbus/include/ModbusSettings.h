@@ -7,8 +7,9 @@
 
 // Modbus settings ========================================
 #define MB_SLAVE_ID			0x01
-#define MB_CHECKS			false			// Disable ID check and CRC check
+#define MB_CHECKS			true			// ID check and CRC check (enabled by default)
 #define MB_BUFFER_SIZE		96				// Size of content buffer on ModbusData - Depends on the size of your memory map
+#define MB_BROADCAST_EXTRA_ID		255		// Broadcast exclusive ID (it will work with Broadcast ID 0 too)
 
 // Memory map settings ====================================
 #define MB_COILS_ENABLED				1

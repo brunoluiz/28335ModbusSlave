@@ -186,7 +186,7 @@ void slave_receive(ModbusSlave *self){
 void slave_process(ModbusSlave *self){
 	self->jumpProcessState = false;
 
-	#if (MB_CHECKS == false)
+	#if (MB_CHECKS == true)
 	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
 	Uint16 generatedCrc;
 
@@ -277,6 +277,11 @@ void slave_process(ModbusSlave *self){
 			self->dataHandler.exception(self, MB_ERROR_ILLEGALFUNC);
 		}
 		self->state = MB_TRANSMIT;
+	}
+
+	if (self->dataRequest.slaveAddress == 0 || self->dataRequest.slaveAddress == MB_BROADCAST_EXTRA_ID){
+		MB_SLAVE_DEBUG("Broadcast message - Jumping to MB_START");
+		self->state = MB_START;
 	}
 
 	#if DEBUG_UTILS_PROFILING
