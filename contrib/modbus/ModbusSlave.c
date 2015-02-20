@@ -59,7 +59,7 @@ void slave_create(ModbusSlave *self){
 
 	// Configure Serial Port A
 	self->serial.baudrate = SERIAL_BAUDRATE;
-	self->serial.parityType = SERIAL_PARITY_NONE;
+	self->serial.parityType = SERIAL_PARITY;
 	self->serial.bitsNumber = SERIAL_BITS_NUMBER;
 	self->serial.init(&self->serial);
 
@@ -184,12 +184,12 @@ void slave_receive(ModbusSlave *self){
 // Do the "magic". Check if the request have the right CRC and is for this device
 // After first checks, it will begin the requested funcion code and prepare the dataResponse
 void slave_process(ModbusSlave *self){
-	self->jumpProcessState = false;
-
-	#if (MB_CHECKS == true)
 	Uint16 sizeWithoutCrc = self->dataRequest.size - 2;
 	Uint16 generatedCrc;
 
+	self->jumpProcessState = false;
+
+	#if (MB_CHECKS == true)
 	// Get the received CRC
 	self->dataRequest.crc = (self->dataRequest.content[self->dataRequest.contentIdx - 2] << 8) |
 			self->dataRequest.content[self->dataRequest.contentIdx - 1];
