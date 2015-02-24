@@ -31,3 +31,6 @@ Debug/
 
 # TeXlipse plugin
 .texlipse
+
+# CCSv3 Output folder
+CCSv3/
