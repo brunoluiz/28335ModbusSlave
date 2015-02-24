@@ -7,7 +7,7 @@
 
 void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode) {
 	// Each requested register has two bytes inside of it, so the code has to multiply by 2
-	Uint16 firstDataAddress = (slave->dataRequest.content[MB_READ_ADDRESS_HIGH] << 8) |
+	Uint16 firstAddr = (slave->dataRequest.content[MB_READ_ADDRESS_HIGH] << 8) |
 			slave->dataRequest.content[MB_READ_ADDRESS_LOW];
 	Uint16 totalDataRequested = (slave->dataRequest.content[MB_READ_TOTALDATA_HIGH] << 8) |
 			slave->dataRequest.content[MB_READ_TOTALDATA_LOW];
@@ -15,8 +15,11 @@ void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode
 
 	Uint16 sizeWithoutCRC;
 	Uint16 * transmitString;
-	Uint16 idx;
-	Uint16 reg16ReturnIdx = 0;
+	Uint16 idx, initialIdx, firstAddrOffset, reg16JumpOperator, reg16ReturnIdx;
+	Uint16 itensToProcess;
+	Uint16 content = 0, contentNext = 0, contentFinal = 0;
+	Uint16 padding = 0, paddingNext = 0;
+	unsigned short maskFinal, maskOffset;
 
 	// Reference to MODBUS Data Map
 	char * dataPtr;
@@ -38,22 +41,30 @@ void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode
 	slave->dataResponse.content[slave->dataResponse.contentIdx++] = numberOfBytes;
 
 	// MODIFIABLE: specified address values
-	for (idx = 0; idx < numberOfBytes; idx++) {
-		Uint16 coilsNum = totalDataRequested - idx*8;
-		Uint16 padding = idx + firstDataAddress - reg16ReturnIdx;
-		Uint16 content = 0;
-		content = *(dataPtr + padding) >> (reg16ReturnIdx*8);
+	initialIdx      = floor(firstAddr/8);
+	firstAddrOffset = firstAddr - 8*initialIdx;
+	maskOffset      = ~(0xFFFF << firstAddrOffset);
 
-		if(coilsNum >= 8) {
-			slave->dataResponse.content[slave->dataResponse.contentIdx++] = content & 0x00FF;
-		} else {
-			Uint16 mask;
-			mask = ~(0xFFFF << coilsNum);
-			slave->dataResponse.content[slave->dataResponse.contentIdx++] = content & mask;
+	for (idx = initialIdx; idx < (numberOfBytes + initialIdx); idx++) {
+		reg16JumpOperator = idx % 2;
+		maskFinal   = 0x00FF;
+		padding     = idx     - reg16JumpOperator;
+		paddingNext = (idx+1) - !reg16JumpOperator;
+
+		itensToProcess  = totalDataRequested - (idx - initialIdx)*8;
+
+		content     = *(dataPtr + padding)     >> (reg16JumpOperator  *8);
+		contentNext = *(dataPtr + paddingNext) >> (!reg16JumpOperator *8);
+
+		contentNext  = (contentNext & maskOffset) << (8 - firstAddrOffset);
+		content      = (content >> firstAddrOffset);
+		contentFinal = contentNext | content;
+
+		if(itensToProcess < 8) {
+			maskFinal = ~(0xFFFF << itensToProcess);
 		}
 
-		if(reg16ReturnIdx == 0) reg16ReturnIdx = 1;
-		else reg16ReturnIdx = 0;
+		slave->dataResponse.content[slave->dataResponse.contentIdx++] = contentFinal & maskFinal;
 	}
 
 	// Data response size based on total data requested
@@ -70,7 +81,7 @@ void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode
 
 void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode) {
 	// Each requested register has two bytes inside of it, so the code has to multiply by 2
-	Uint16 firstDataAddress = (slave->dataRequest.content[MB_READ_ADDRESS_HIGH] << 8) |
+	Uint16 firstAddr = (slave->dataRequest.content[MB_READ_ADDRESS_HIGH] << 8) |
 			slave->dataRequest.content[MB_READ_ADDRESS_LOW];
 	Uint16 totalDataRequested = (slave->dataRequest.content[MB_READ_TOTALDATA_HIGH] << 8) |
 			slave->dataRequest.content[MB_READ_TOTALDATA_LOW];
@@ -99,7 +110,7 @@ void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode)
 	// MODIFIABLE: Reads specified address values
 	// The actual model works with 32 bits size registers. Adapt it to your needs.
 	for (idx = 0; idx < totalDataRequested; idx++) {
-		Uint16 padding = idx + firstDataAddress;
+		Uint16 padding = idx + firstAddr;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (*(registersPtr + padding + 1) & 0xFF00) >> 8;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = *(registersPtr + padding + 1) & 0x00FF;
 		idx++;
