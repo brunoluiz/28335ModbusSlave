@@ -59,7 +59,7 @@ void slave_create(ModbusSlave *self){
 
 	// Configure Serial Port A
 	self->serial.baudrate = SERIAL_BAUDRATE;
-	self->serial.parityType = SERIAL_PARITY_NONE;
+	self->serial.parityType = SERIAL_PARITY;
 	self->serial.bitsNumber = SERIAL_BITS_NUMBER;
 	self->serial.init(&self->serial);
 
@@ -189,8 +189,7 @@ void slave_process(ModbusSlave *self){
 
 	self->jumpProcessState = false;
 
-	#if (MB_CHECKS == false)
-
+	#if (MB_CHECKS == true)
 	// Get the received CRC
 	self->dataRequest.crc = (self->dataRequest.content[self->dataRequest.contentIdx - 2] << 8) |
 			self->dataRequest.content[self->dataRequest.contentIdx - 1];
@@ -278,6 +277,11 @@ void slave_process(ModbusSlave *self){
 			self->dataHandler.exception(self, MB_ERROR_ILLEGALFUNC);
 		}
 		self->state = MB_TRANSMIT;
+	}
+
+	if (self->dataRequest.slaveAddress == 0 || self->dataRequest.slaveAddress == MB_BROADCAST_EXTRA_ID){
+		MB_SLAVE_DEBUG("Broadcast message - Jumping to MB_START");
+		self->state = MB_START;
 	}
 
 	#if DEBUG_UTILS_PROFILING
