@@ -5,7 +5,8 @@
  *      Author: bds
  */
 
-#include "ModbusDataMap.h"
+#include "ModbusSettings.h"
+#include MB_DATA_MAP
 #include "Log.h"
 
 #if MB_COILS_ENABLED

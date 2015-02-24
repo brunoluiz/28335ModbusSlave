@@ -9,13 +9,10 @@ int main(){
 
 	mb = construct_ModbusSlave();
 
-	mb.coils.dummy1 = 1;
-	mb.coils.dummy5 = 1;
-	mb.coils.dummy10 = 1;
-	mb.coils.dummy15 = 1;
-
-	mb.holdingRegisters.dummy1 = 20.2;
-	mb.holdingRegisters.dummy3 = 20.2;
+//	mb.coils.dummy1 = 1;
+//	mb.coils.dummy3 = 1;
+//
+//	mb.holdingRegisters.AmplitudeDeTensaoCa = 25.73;
 
 	while(1) {
 		mb.loopStates(&mb);

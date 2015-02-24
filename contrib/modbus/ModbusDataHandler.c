@@ -15,7 +15,7 @@ void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode
 
 	Uint16 sizeWithoutCRC;
 	Uint16 * transmitString;
-	Uint16 idx, initialIdx, firstAddrOffset, reg16JumpOperator, reg16ReturnIdx;
+	Uint16 idx, initialIdx, firstAddrOffset, reg16JumpOperator;
 	Uint16 itensToProcess;
 	Uint16 content = 0, contentNext = 0, contentFinal = 0;
 	Uint16 padding = 0, paddingNext = 0;
