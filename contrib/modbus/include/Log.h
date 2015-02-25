@@ -12,7 +12,7 @@
 	do { fprintf(stderr, "%s():%d called! " fmt "\n", __FUNCTION__, \
 		__LINE__); } \
 		while (0)
-// Original expression (found at web but don´t work in some cases)
+// Original expression (found at web but don't work in some cases)
 //do { fprintf(stderr, "%s:%d:%s() ## " fmt "\n", __FILE__, \
 //	__LINE__, __FUNCTION__, __VA_ARGS__); } while (0)
 #else
@@ -21,7 +21,7 @@
 
 
 // Different logs =======================
-// Each file has it´s specific Log debug. If you want to enable only some
+// Each file has it's specific Log debug. If you want to enable only some
 // logs, go to Modbus.h and modify the macros XXXXX_DEBUG_ENABLED
 
 #if MB_DATA_REQUEST_DEBUG_ENABLED && DEBUG_LOG_ENABLED
@@ -46,6 +46,12 @@
 	#define SERIAL_DEBUG(fmt, ...) SMART_DEBUG(fmt, __VA_ARGS__)
 #else
 	#define SERIAL_DEBUG(nonVariadicVar)
+#endif
+
+#if MB_MASTER_DEBUG_ENABLED && DEBUG_LOG_ENABLED
+	#define MB_MASTER_DEBUG(fmt, ...) SMART_DEBUG(fmt, __VA_ARGS__)
+#else
+	#define MB_MASTER_DEBUG(nonVariadicVar)
 #endif
 
 #if MB_SLAVE_DEBUG_ENABLED && DEBUG_LOG_ENABLED
