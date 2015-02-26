@@ -1,0 +1,3 @@
+- Create an program using libmodbus to test the DSP
+- Comment the code
+- Build a better documentation (explaining the lifecycle) 
