@@ -67,25 +67,11 @@ ModbusInputsMap construct_ModbusInputsMap();
 #if MB_HOLDING_REGISTERS_ENABLED
 typedef struct ModbusHoldingRegistersMap ModbusHoldingRegistersMap;
 struct ModbusHoldingRegistersMap {
-	bool dummy0:1;
-	bool dummy1:1;
-	bool dummy2:1;
-	bool dummy3:1;
-	bool dummy4:1;
-	bool dummy5:1;
-	bool dummy6:1;
-	bool dummy7:1;
-	bool dummy8:1;
-	bool dummy9:1;
-	bool dummy10:1;
-	bool dummy11:1;
-	bool dummy12:1;
-	bool dummy13:1;
-	bool dummy14:1;
-	bool dummy15:1;
-	bool dummy16:1;
-	bool dummy17:1;
-	bool dummy18:1;
+	float32 dummy0;
+	float32 dummy1;
+	float32 dummy2;
+	float32 dummy3;
+	float32 dummy4;
 };
 
 ModbusHoldingRegistersMap construct_ModbusHoldingRegistersMap();

@@ -14,9 +14,9 @@
 
 // Memory map settings ====================================
 #define MB_COILS_ENABLED				1
-#define MB_INPUTS_ENABLED				0
+#define MB_INPUTS_ENABLED				1
 #define	MB_HOLDING_REGISTERS_ENABLED	1
-#define MB_INPUT_REGISTERS_ENABLED		0
+#define MB_INPUT_REGISTERS_ENABLED		1
 
 // Serial settings ========================================
 #define SERIAL_BAUDRATE 	38400
