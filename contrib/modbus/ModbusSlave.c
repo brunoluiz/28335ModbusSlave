@@ -1,9 +1,25 @@
 #include "ModbusSlave.h"
+#include "ModbusSettings.h"
 #include "Log.h"
 
 #if DEBUG_UTILS_PROFILING
 #include "Profiling.h"
 ProfilingTool profiling;
+#endif
+
+// Time constant
+
+// Configure the 3.5c time for timer
+// For baudrates higher than 19200 is recommended a fixed value
+#if SERIAL_BAUDRATE <= 19200
+Uint16 serialFrameSize = SERIAL_START_STOP_NUMBER_BITS
+		+ SERIAL_BITS_NUMBER
+		+ SERIAL_PARITY_NUMBER_BITS;
+Uint64 mbT35 = (serialFrameSize * 3500000) / SERIAL_BAUDRATE;
+Uint64 mbT15 = (serialFrameSize * 1500000) / SERIAL_BAUDRATE;
+#else
+Uint64 mbT35 = 1750;
+Uint64 mbT15 = 750;
 #endif
 
 void slave_loopStates(ModbusSlave *self){
@@ -44,17 +60,6 @@ void slave_loopStates(ModbusSlave *self){
 // Initialize all needed peripherals (timer and serial mostly)
 // Only executed once!
 void slave_create(ModbusSlave *self){
-
-	// Configure the 3.5c time for timer
-	// For baudrates higher than 19200 is recommended a fixed value
-#if SERIAL_BAUDRATE <= 19200
-	Uint16 serialFrameSize = SERIAL_START_STOP_NUMBER_BITS
-			+ SERIAL_BITS_NUMBER
-			+ SERIAL_PARITY_NUMBER_BITS;
-	Uint64 mbT35 = (serialFrameSize * 3500000) / SERIAL_BAUDRATE;
-#else
-	Uint64 mbT35 = 1750;
-#endif
 	MB_SLAVE_DEBUG();
 
 	// Configure Serial Port A
@@ -115,9 +120,22 @@ void slave_timerT35Wait(ModbusSlave *self){
 void slave_receive(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
+	// Configure timer with the 3.5c time for timeout
+	self->timer.init(&self->timer, mbT15 * 2);
+	self->timer.resetTimer();
+
 	// Wait to receive Slave ID and Function Code
 	while ( ( self->serial.rxBufferStatus() < 2 ) &&
-		(self->serial.getRxError() == false ) ){}
+		(self->serial.getRxError() == false ) &&
+		(self->timer.expiredTimer(&self->timer) == false) ){
+	}
+
+	// Timer 1.5c timeout
+	self->timer.stop();
+	if (self->timer.expiredTimer(&self->timer)) {
+		self->state = MB_START;
+		return ;
+	}
 
 	// Check which function code it is to adjust the size of the RX FIFO buffer
 	// In the case of function code 0x0010, it has a variable size
@@ -146,12 +164,24 @@ void slave_receive(ModbusSlave *self){
 
 	// Waiting RX data until fifoWaitBuffer == 0
 	// While waiting the data, it already empty the buffer, allowing to receive a lot of data
-	while ( (self->serial.fifoWaitBuffer > 0) && (self->serial.getRxError() == false ) ){
+	self->timer.init(&self->timer, mbT15 * self->serial.fifoWaitBuffer);
+	self->timer.resetTimer();
+	self->timer.start();
+	while ( (self->serial.fifoWaitBuffer > 0) &&
+			(self->serial.getRxError() == false ) &&
+			(self->timer.expiredTimer(&self->timer) == false) ){
 		if(self->serial.rxBufferStatus() > 0) {
 			self->dataRequest.content[self->dataRequest.contentIdx++] = self->serial.getRxBufferedWord();
 			self->serial.fifoWaitBuffer--;
 		}
 	}
+
+	// Timer 1.5c timeout
+	if (self->timer.expiredTimer(&self->timer)) {
+		self->state = MB_START;
+		return ;
+	}
+	self->timer.stop();
 
 	// If there is any error on reception, it will go to the START state
 	// Else it will get some data from the request
