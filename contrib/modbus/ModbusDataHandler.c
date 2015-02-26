@@ -34,6 +34,11 @@ void datahandler_readDigitalData(ModbusSlave *slave, ModbusFunctionCode funcCode
 	}
 #endif
 
+	if (totalDataRequested == 0) {
+		slave->dataHandler.exception(slave, MB_ERROR_ILLEGALDATA);
+		return ;
+	}
+
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
 	slave->dataResponse.functionCode = funcCode;
 
@@ -101,6 +106,11 @@ void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode)
 	}
 #endif
 
+	if (totalDataRequested == 0) {
+		slave->dataHandler.exception(slave, MB_ERROR_ILLEGALDATA);
+		return ;
+	}
+
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
 	slave->dataResponse.functionCode = funcCode;
 
@@ -112,16 +122,16 @@ void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode)
 	for (idx = 0; idx < totalDataRequested; idx++) {
 		Uint16 padding = idx + firstAddr;
 
-		#if MB_32_BITS_REGISTERS == true
+#if MB_32_BITS_REGISTERS == true
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (*(registersPtr + padding + 1) & 0xFF00) >> 8;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = *(registersPtr + padding + 1) & 0x00FF;
 		idx++;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (*(registersPtr + padding) & 0xFF00) >> 8;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = *(registersPtr + padding) & 0x00FF;
-		#else
+#else
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (*(registersPtr + padding) & 0xFF00) >> 8;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = *(registersPtr + padding) & 0x00FF;
-		#endif
+#endif
 	}
 
 	// Data response size based on total data requested
@@ -230,6 +240,11 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 	char * registersPtr;
 	registersPtr = (char *)&(slave->holdingRegisters);
 
+	if (totalData == 0) {
+		slave->dataHandler.exception(slave, MB_ERROR_ILLEGALDATA);
+		return ;
+	}
+
 	// Prepare response (it is the same thing of dataRequest, but you can do some checks at writen registers)
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
 	slave->dataResponse.functionCode = MB_FUNC_WRITE_NREGISTERS;
@@ -240,7 +255,7 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 
 	// MODIFIABLE: Writes values at specified address values
 	for (idx = 0; idx < totalData; idx++) {
-		#if MB_32_BITS_REGISTERS
+#if MB_32_BITS_REGISTERS
 		// Used to invert the ptr to access the register. The values are saved in the format LOW|HIGH instead of HIGH|LOW
 		// This tweak invert the idx to gave the right access based on the order of MODBUS
 		Uint16 idxCorrection = idx^0x0001;
@@ -249,13 +264,13 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 
 		*(memAddr) = (slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx*2] << 8) |
 				slave->dataRequest.content[MB_WRITE_N_VALUES_START_LOW + idx*2];
-		#else
+#else
 		Uint16 padding = idx + dataAddress;
 		memAddr = (Uint16 *) (registersPtr + padding);
 
 		*(memAddr) = (slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx*2] << 8) |
 				slave->dataRequest.content[MB_WRITE_N_VALUES_START_LOW + idx*2];
-		#endif
+#endif
 	}
 
 	// Data response size
@@ -285,6 +300,11 @@ void datahandler_forceMultipleCoils(ModbusSlave *slave){
 	// Reference to MODBUS Data Map
 	char * coilsPtr;
 	coilsPtr = (char *)&(slave->coils);
+
+	if (totalCoils == 0) {
+		slave->dataHandler.exception(slave, MB_ERROR_ILLEGALDATA);
+		return ;
+	}
 
 	// Prepare response (it is the same thing of dataRequest, but you can do some checks at writen registers)
 	slave->dataResponse.slaveAddress = MB_SLAVE_ID;
