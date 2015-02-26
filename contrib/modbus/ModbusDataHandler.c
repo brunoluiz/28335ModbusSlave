@@ -111,11 +111,17 @@ void datahandler_readAnalogData(ModbusSlave *slave, ModbusFunctionCode funcCode)
 	// The actual model works with 32 bits size registers. Adapt it to your needs.
 	for (idx = 0; idx < totalDataRequested; idx++) {
 		Uint16 padding = idx + firstAddr;
+
+		#if MB_32_BITS_REGISTERS == true
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (*(registersPtr + padding + 1) & 0xFF00) >> 8;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = *(registersPtr + padding + 1) & 0x00FF;
 		idx++;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (*(registersPtr + padding) & 0xFF00) >> 8;
 		slave->dataResponse.content[slave->dataResponse.contentIdx++] = *(registersPtr + padding) & 0x00FF;
+		#else
+		slave->dataResponse.content[slave->dataResponse.contentIdx++] = (*(registersPtr + padding) & 0xFF00) >> 8;
+		slave->dataResponse.content[slave->dataResponse.contentIdx++] = *(registersPtr + padding) & 0x00FF;
+		#endif
 	}
 
 	// Data response size based on total data requested
@@ -234,14 +240,22 @@ void datahandler_presetMultipleRegisters(ModbusSlave *slave){
 
 	// MODIFIABLE: Writes values at specified address values
 	for (idx = 0; idx < totalData; idx++) {
+		#if MB_32_BITS_REGISTERS
 		// Used to invert the ptr to access the register. The values are saved in the format LOW|HIGH instead of HIGH|LOW
 		// This tweak invert the idx to gave the right access based on the order of MODBUS
 		Uint16 idxCorrection = idx^0x0001;
-
 		Uint16 padding = idxCorrection + dataAddress;
 		memAddr = (Uint16 *) (registersPtr + padding);
+
 		*(memAddr) = (slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx*2] << 8) |
 				slave->dataRequest.content[MB_WRITE_N_VALUES_START_LOW + idx*2];
+		#else
+		Uint16 padding = idx + dataAddress;
+		memAddr = (Uint16 *) (registersPtr + padding);
+
+		*(memAddr) = (slave->dataRequest.content[MB_WRITE_N_VALUES_START_HIGH + idx*2] << 8) |
+				slave->dataRequest.content[MB_WRITE_N_VALUES_START_LOW + idx*2];
+		#endif
 	}
 
 	// Data response size
