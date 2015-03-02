@@ -74,6 +74,9 @@ typedef enum {
 
 // Size constants (with CRC) ==============================
 
+#define MB_DATA_MAX_SIZE			0x270E
+#define MB_DATA_MAX_REQUEST_SIZE	0x7D
+
 #define MB_SIZE_COMMON_DATA			4 // Slave address (1 byte) + Function Code (1 byte) + CRC (2 bytes)
 #define MB_SIZE_CONTENT_NORMAL		4
 // Response sizes

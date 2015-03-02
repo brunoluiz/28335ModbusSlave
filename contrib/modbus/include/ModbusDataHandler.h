@@ -17,6 +17,7 @@ struct ModbusDataHandler {
 	void (*presetMultipleRegisters)(ModbusSlave *slave);
 	void (*forceMultipleCoils)(ModbusSlave *slave);
 
+	bool (*checkException)(ModbusSlave *slave, Uint16 firstAddr, Uint16 totalData, Uint16 sizeOfMap);
 	void (*exception)(ModbusSlave *slave, ModbusError exceptionCode);
 };
 
@@ -26,6 +27,7 @@ inline void datahandler_presetSingleRegister(ModbusSlave *slave);
 inline void datahandler_forceSingleCoil(ModbusSlave *slave);
 inline void datahandler_presetMultipleRegisters(ModbusSlave *slave);
 inline void datahandler_forceMultipleCoils(ModbusSlave *slave);
+inline bool datahandler_checkException(ModbusSlave *slave, Uint16 firstAddr, Uint16 totalData, Uint16 sizeOfMap);
 inline void datahandler_exception(ModbusSlave *slave, ModbusError exceptionCode);
 ModbusDataHandler construct_ModbusDataHandler();
 

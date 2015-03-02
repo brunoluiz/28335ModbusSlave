@@ -120,21 +120,9 @@ void slave_timerT35Wait(ModbusSlave *self){
 void slave_receive(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 
-	// Configure timer with the 3.5c time for timeout
-	self->timer.init(&self->timer, mbT15 * 2);
-	self->timer.resetTimer();
-
 	// Wait to receive Slave ID and Function Code
 	while ( ( self->serial.rxBufferStatus() < 2 ) &&
-		(self->serial.getRxError() == false ) &&
-		(self->timer.expiredTimer(&self->timer) == false) ){
-	}
-
-	// Timer 1.5c timeout
-	self->timer.stop();
-	if (self->timer.expiredTimer(&self->timer)) {
-		self->state = MB_START;
-		return ;
+		(self->serial.getRxError() == false ) ){
 	}
 
 	// Check which function code it is to adjust the size of the RX FIFO buffer
@@ -164,7 +152,7 @@ void slave_receive(ModbusSlave *self){
 
 	// Waiting RX data until fifoWaitBuffer == 0
 	// While waiting the data, it already empty the buffer, allowing to receive a lot of data
-	self->timer.init(&self->timer, mbT15 * self->serial.fifoWaitBuffer);
+	self->timer.init(&self->timer, mbT15 * (self->serial.fifoWaitBuffer + 2));
 	self->timer.resetTimer();
 	self->timer.start();
 	while ( (self->serial.fifoWaitBuffer > 0) &&
@@ -249,40 +237,13 @@ void slave_process(ModbusSlave *self){
 			MB_SLAVE_DEBUG("Reading coils");
 			self->dataHandler.readDigitalData(self, MB_FUNC_READ_COIL);
 		}
-		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUT && MB_INPUTS_ENABLED){
-			MB_SLAVE_DEBUG("Reading coils");
-			self->dataHandler.readDigitalData(self, MB_FUNC_READ_INPUT);
-		}
-		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUTREGISTERS && MB_INPUT_REGISTERS_ENABLED){
-			MB_SLAVE_DEBUG("Reading input registers");
-#if MB_INPUT_REGISTERS_ENABLED
-			if( (self->dataRequest.content[MB_READ_ADDRESS_HIGH] | self->dataRequest.content[MB_READ_ADDRESS_LOW] ) +
-					( self->dataRequest.content[MB_READ_TOTALDATA_HIGH] | self->dataRequest.content[MB_READ_TOTALDATA_LOW] ) > sizeof(mb.inputRegisters))
-			{
-				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
-			} else {
-				self->dataHandler.readAnalogData(self, MB_FUNC_READ_INPUTREGISTERS);
-			}
-#endif
-		}
 		else if (self->dataRequest.functionCode == MB_FUNC_READ_HOLDINGREGISTERS && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Reading holding registers");
-			if( (self->dataRequest.content[MB_READ_ADDRESS_HIGH] | self->dataRequest.content[MB_READ_ADDRESS_LOW]) +
-					(self->dataRequest.content[MB_READ_TOTALDATA_HIGH] | self->dataRequest.content[MB_READ_TOTALDATA_LOW]) > sizeof(mb.holdingRegisters))
-			{
-				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
-			} else {
-				self->dataHandler.readAnalogData(self, MB_FUNC_READ_HOLDINGREGISTERS);
-			}
+			self->dataHandler.readAnalogData(self, MB_FUNC_READ_HOLDINGREGISTERS);
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_HOLDINGREGISTER && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Presetting holding register");
-			if( (self->dataRequest.content[MB_WRITE_ADDRESS_HIGH] | self->dataRequest.content[MB_WRITE_ADDRESS_LOW] ) > sizeof(mb.holdingRegisters))
-			{
-				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
-			} else {
-				self->dataHandler.presetSingleRegister(self);
-			}
+			self->dataHandler.presetSingleRegister(self);
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_COIL && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Forcing coil");
@@ -290,18 +251,24 @@ void slave_process(ModbusSlave *self){
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_WRITE_NREGISTERS && MB_HOLDING_REGISTERS_ENABLED){
 			MB_SLAVE_DEBUG("Presetting multiple holding registers");
-			if( (self->dataRequest.content[MB_WRITE_N_ADDRESS_HIGH] | self->dataRequest.content[MB_WRITE_N_ADDRESS_LOW] ) +
-					( self->dataRequest.content[MB_WRITE_N_QUANTITY_HIGH] | self->dataRequest.content[MB_WRITE_N_QUANTITY_LOW] ) > sizeof(mb.holdingRegisters))
-			{
-				self->dataHandler.exception(self, MB_ERROR_ILLEGALADDR);
-			} else {
-				self->dataHandler.presetMultipleRegisters(self);
-			}
+			self->dataHandler.presetMultipleRegisters(self);
 		}
 		else if (self->dataRequest.functionCode == MB_FUNC_FORCE_NCOILS && MB_COILS_ENABLED){
 			MB_SLAVE_DEBUG("Forcing multiple coils");
 			self->dataHandler.forceMultipleCoils(self);
 		}
+#if MB_INPUTS_ENABLED
+		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUT && MB_INPUTS_ENABLED){
+			MB_SLAVE_DEBUG("Reading inputs");
+			self->dataHandler.readDigitalData(self, MB_FUNC_READ_INPUT);
+		}
+#endif
+#if MB_INPUT_REGISTERS_ENABLED
+		else if (self->dataRequest.functionCode == MB_FUNC_READ_INPUTREGISTERS && MB_INPUT_REGISTERS_ENABLED){
+			MB_SLAVE_DEBUG("Reading input registers");
+			self->dataHandler.readAnalogData(self, MB_FUNC_READ_INPUTREGISTERS);
+		}
+#endif
 		else {
 			MB_SLAVE_DEBUG("Exception: ILLEGALFUNC");
 			self->dataHandler.exception(self, MB_ERROR_ILLEGALFUNC);

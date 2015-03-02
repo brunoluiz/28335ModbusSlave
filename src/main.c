@@ -14,6 +14,16 @@ int main(){
 //
 //	mb.holdingRegisters.AmplitudeDeTensaoCa = 25.73;
 
+#if MB_LIBMODBUS_TESTS
+	mb.inputRegisters.dummy25 = 0x000A;
+
+	mb.holdingRegisters.dummy2 = 0x01;
+	mb.holdingRegisters.dummy3 = 0x01;
+	mb.holdingRegisters.dummy4 = 0x01;
+	mb.holdingRegisters.dummy5 = 0x01;
+	mb.holdingRegisters.dummy6 = 0x01;
+#endif
+
 	while(1) {
 		mb.loopStates(&mb);
 	}
