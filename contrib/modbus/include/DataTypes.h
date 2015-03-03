@@ -26,4 +26,7 @@ typedef float              float32;
 typedef long double        float64;
 #endif
 
+typedef short     		   int8;
+typedef unsigned short     Uint8;
+
 #endif /* DATATYPES_H_ */
