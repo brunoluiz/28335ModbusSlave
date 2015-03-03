@@ -9,11 +9,6 @@ int main(){
 
 	mb = construct_ModbusSlave();
 
-//	mb.coils.dummy1 = 1;
-//	mb.coils.dummy3 = 1;
-//
-//	mb.holdingRegisters.AmplitudeDeTensaoCa = 25.73;
-
 #if MB_LIBMODBUS_TESTS
 //	0xAC, 0xDB, 0x35
 	mb.inputs.dummy10  = 1;

@@ -13,6 +13,7 @@ local.properties
 .settings/
 Debug/
 .loadpath
+*~
 
 # External tool builders
 .externalToolBuilders/

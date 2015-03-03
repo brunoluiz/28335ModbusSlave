@@ -8,6 +8,8 @@
 // For CPU Frequency = 100 Mhz
 //#define CPU_FREQ	100
 
+struct CPUTIMER_VARS CpuTimer0;
+
 void timer_resetTimer(){
 	CpuTimer0Regs.TCR.bit.TRB = 1;
 	TIMER_DEBUG();
@@ -31,7 +33,9 @@ void timer_setTimerReloadPeriod(Timer *self, Uint32 time){
 	self->stop();
 	self->reloadTime = time;
 
-	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, time);
+	CpuTimer0.CPUFreqInMHz = CPU_FREQ;
+	CpuTimer0.PeriodInUSec = time;
+	CpuTimer0.RegsAddr->PRD.all = (long) time * CPU_FREQ;
 }
 
 
@@ -55,9 +59,16 @@ void timer_init(Timer *self, Uint32 time){
 
 	// Config the timer reload period
 	self->reloadTime = time;
-	ConfigCpuTimer(&CpuTimer0, CPU_FREQ, time);
+	CpuTimer0.CPUFreqInMHz = CPU_FREQ;
+	CpuTimer0.PeriodInUSec = time;
+	CpuTimer0.RegsAddr->PRD.all = (long) time * CPU_FREQ;
+
+	// Run mode settings
+	CpuTimer0.RegsAddr->TCR.bit.SOFT = 1;
+	CpuTimer0.RegsAddr->TCR.bit.FREE = 1;     // Timer Free Run
 
 	// If needed, you can set interruptions and other things here
+	//	CpuTimer0.RegsAddr->TCR.bit.TIE = 1;      // 0 = Disable/ 1 = Enable Timer Interrupt
 
 	TIMER_DEBUG();
 }
