@@ -29,7 +29,7 @@ Don't forget to exclude from compilation the ```contrib/dspProfiling``` and ```c
 
 Code Composers 3 or ealier versions
 -----------------------------------
-If you use CodeComposer v3.x or earlier, probably your directory structure uses PROJECT/Source and PROJECT/Include to control the src and header files. To make it more easier for your use, you can run makeCSSv3.bat to create a folder with the same structure of CCSv3.
+If you use CodeComposer v3.x or earlier, probably your directory structure uses PROJECT/Source and PROJECT/Include to control the src and header files. To make it more easier for your use, you can run makeCSSv3.bat (or makeCSSv3.sh if you use Linux) to create a folder with the same structure of CCSv3.
 
 At the batch file you can configure a different folder (CCSv3OutputDir), but the default action is create a "CCSv3" folder at the MODBUS root folder. If you don't have the serial and timer headers from Texas, I suggest you to enable their copy process changing the "CopySerialTimerHeader" variable.
  
