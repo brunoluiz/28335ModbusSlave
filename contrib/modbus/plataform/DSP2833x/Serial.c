@@ -1,19 +1,7 @@
 #include "DSP2833x_Device.h"     // DSP2833x Headerfile Include File
 #include "Serial.h"
 #include "Log.h"
-
-// CPU Frequency (and LSPCLK) =============================
-// The below values are the most common
-
-// For CPU Frequency = 150 Mhz
-#define CPU_FREQ	150
-#define LSPCLK 	37500000
-// For CPU Frequency = 100 Mhz
-//#define CPU_FREQ	100
-//#define LSPCLK 		20000000
-// Other example (LSPCLK different than the common)
-//#define CPU_FREQ	150
-//#define LSPCLK 		15000000
+#include "ModbusSettings.h"
 
 // Clear flags of overflow
 void serial_clear(){
@@ -112,7 +100,8 @@ void serial_init(Serial *self){
 	}
 
 	// Baud rate settings - Automatic depending on self->baudrate
-	baudrate = (Uint32) (LSPCLK / (self->baudrate*8) - 1);
+//	baudrate = (Uint32) (SysCtrlRegs.LOSPCP.bit.LSPCLK / (self->baudrate*8) - 1);
+	baudrate = (Uint32) (LOW_SPEED_CLOCK / (self->baudrate*8) - 1);
 
 	// Configure the High and Low baud rate registers
 	SciaRegs.SCIHBAUD = (baudrate & 0xFF00) >> 8;

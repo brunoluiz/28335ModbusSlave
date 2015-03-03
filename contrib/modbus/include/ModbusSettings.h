@@ -7,11 +7,10 @@
 
 // Modbus settings ========================================
 #define MB_SLAVE_ID				0x01
-#define MB_CHECKS				true			// ID check and CRC check (enabled by default)
-#define MB_BUFFER_SIZE			96				// Size of content buffer on ModbusData - Depends on the size of your memory map
+#define MB_CHECKS				true	// ID check and CRC check (enabled by default)
+#define MB_BUFFER_SIZE			96		// Size of content buffer on ModbusData - Depends on the size of your memory map
 #define MB_BROADCAST_EXTRA_ID	255		// Broadcast exclusive ID (it will work with Broadcast ID 0 too)
-#define MB_LIBMODBUS_TESTS		true
-
+#define MB_LIBMODBUS_TESTS		false
 
 // Memory map settings ====================================
 #define MB_DATA_MAP						"ModbusDataMap.h"
@@ -25,6 +24,11 @@
 #define MB_DATA_MAP						"ModbusDataMapTests.h"
 #define MB_32_BITS_REGISTERS			false
 #endif
+
+// Device settings (DSP f28335)
+#define CPU_FREQ			150
+#define LOW_SPEED_CLOCK 	37500000
+//#define LOW_SPEED_CLOCK 	15000000
 
 // Serial settings ========================================
 #define SERIAL_BAUDRATE 	38400

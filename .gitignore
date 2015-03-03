@@ -35,3 +35,6 @@ Debug/
 
 # CCSv3 Output folder
 CCSv3/
+
+# Project Specific
+ModbusDataMap*.h

@@ -2,11 +2,7 @@
 #include "DSP2833x_CpuTimers.h"
 #include "Timer.h"
 #include "Log.h"
-
-// For CPU Frequency = 150 Mhz
-#define CPU_FREQ	150
-// For CPU Frequency = 100 Mhz
-//#define CPU_FREQ	100
+#include "ModbusSettings.h"
 
 struct CPUTIMER_VARS CpuTimer0;
 
