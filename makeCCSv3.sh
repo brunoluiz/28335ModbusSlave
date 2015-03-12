@@ -35,6 +35,7 @@ fi
 echo
 
 echo "## Ziping CCSv3 fileds"
+rm CCSv3.zip
 zip -r CCSv3 CCSv3
 
 echo "## Done!"
