@@ -8,6 +8,12 @@ echo "## Entering at 28335ModbusSlave directory..."
 cd $scriptPath
 echo 
 
+if [ -d $CCSv3OutputDir ]; then
+	echo "## Destroying old $CCSv3OutputDir directory..."
+	echo 
+	rm -rf $CCSv3OutputDir;
+fi
+
 if [ ! -d $CCSv3OutputDir ]; then
 	echo "## Creating $CCSv3OutputDir directory..."
 	mkdir $CCSv3OutputDir
