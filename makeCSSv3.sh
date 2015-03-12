@@ -34,4 +34,7 @@ if [ $CopySerialTimerHeader == 1 ]; then
 fi
 echo
 
+echo "## Ziping CCSv3 fileds"
+zip -r CCSv3 CCSv3
+
 echo "## Done!"
