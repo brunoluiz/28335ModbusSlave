@@ -7,21 +7,6 @@
 ProfilingTool profiling;
 #endif
 
-// Time constant
-
-// Configure the 3.5c time for timer
-// For baudrates higher than 19200 is recommended a fixed value
-#if SERIAL_BAUDRATE <= 19200
-Uint16 serialFrameSize = SERIAL_START_STOP_NUMBER_BITS
-		+ SERIAL_BITS_NUMBER
-		+ SERIAL_PARITY_NUMBER_BITS;
-Uint64 mbT35 = (serialFrameSize * 3500000) / SERIAL_BAUDRATE;
-Uint64 mbT15 = (serialFrameSize * 1500000) / SERIAL_BAUDRATE;
-#else
-Uint64 mbT35 = 1750;
-Uint64 mbT15 = 750;
-#endif
-
 void slave_loopStates(ModbusSlave *self){
 	MB_SLAVE_DEBUG();
 	switch (self->state) {
@@ -70,6 +55,7 @@ void slave_create(ModbusSlave *self){
 
 	// Configure timer with the 3.5c time for timeout
 	self->timer.init(&self->timer, mbT35);
+
 
 #if DEBUG_UTILS_PROFILING
 	profiling = construct_ProfilingTool();

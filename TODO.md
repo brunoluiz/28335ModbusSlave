@@ -1,2 +1,3 @@
+- Check why Modbus Data maps are not changing (need a make clean before anything)
 - Comment the code
 - Build a better documentation (explaining the lifecycle) 

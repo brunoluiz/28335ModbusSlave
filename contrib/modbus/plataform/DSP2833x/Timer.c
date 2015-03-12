@@ -40,8 +40,6 @@ void timer_init(Timer *self, Uint32 time){
 	// CPU Timer 0
     // Initialize address pointers to respective timer registers:
     CpuTimer0.RegsAddr = &CpuTimer0Regs;
-    // Initialize timer period to maximum:
-    CpuTimer0Regs.PRD.all  = 0xFFFFFFFF;
     // Initialize pre-scale counter to divide by 1 (SYSCLKOUT):
     CpuTimer0Regs.TPR.all  = 0;
     CpuTimer0Regs.TPRH.all = 0;
@@ -57,11 +55,11 @@ void timer_init(Timer *self, Uint32 time){
 	self->reloadTime = time;
 	CpuTimer0.CPUFreqInMHz = CPU_FREQ;
 	CpuTimer0.PeriodInUSec = time;
-	CpuTimer0.RegsAddr->PRD.all = (long) time * CPU_FREQ;
+	CpuTimer0Regs.PRD.all = (long) time * CPU_FREQ;
 
 	// Run mode settings
-	CpuTimer0.RegsAddr->TCR.bit.SOFT = 1;
-	CpuTimer0.RegsAddr->TCR.bit.FREE = 1;     // Timer Free Run
+	CpuTimer0Regs.TCR.bit.SOFT = 1;
+	CpuTimer0Regs.TCR.bit.FREE = 1;     // Timer Free Run
 
 	// If needed, you can set interruptions and other things here
 	//	CpuTimer0.RegsAddr->TCR.bit.TIE = 1;      // 0 = Disable/ 1 = Enable Timer Interrupt
